@@ -1,0 +1,20 @@
+{
+  "name": "kerinciku",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Jelajah Kerinci: permainan browser untuk anak-anak tentang alam dan budaya Kerinci.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "serve": "node scripts/serve.mjs",
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check.mjs",
+    "test": "node --test tests/unit/*.test.mjs",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0"
+  }
+}

@@ -1,0 +1,36 @@
+// What the site consists of, and the headers it is served with. Shared by the
+// build, the local server and the checks, so they cannot drift apart.
+
+/** Top-level files and folders that are published. Everything else stays in the repository. */
+export const SITUS = ['index.html', 'manifest.webmanifest', 'sw.js', 'css', 'js', 'icons'];
+
+/**
+ * The Content-Security-Policy of the live site (deploy/nginx/). No inline script
+ * or style is allowed, so the local server sends the same policy and a
+ * violation shows up before a release, not after.
+ */
+export const CSP = [
+  "default-src 'self'",
+  "img-src 'self' data:",
+  "style-src 'self'",
+  "script-src 'self'",
+  "worker-src 'self'",
+  "connect-src 'self'",
+  "manifest-src 'self'",
+  "base-uri 'self'",
+  "form-action 'none'",
+  "frame-ancestors 'none'",
+  "object-src 'none'",
+].join('; ');
+
+export const KEPALA = {
+  'Content-Security-Policy': CSP,
+  'X-Frame-Options': 'DENY',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()',
+  'Cross-Origin-Opener-Policy': 'same-origin',
+};
+
+/** Download budget for the whole site, in bytes. The game is played on cheap phones with weak signal. */
+export const BATAS_UKURAN = 400 * 1024;
