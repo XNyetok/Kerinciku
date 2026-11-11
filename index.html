@@ -10,34 +10,34 @@
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="css/style.css">
-  <script src="js/muat.js"></script>
+  <script src="js/boot.js"></script>
 </head>
 <body>
   <div id="app"></div>
 
-  <div id="putar" aria-hidden="true">
+  <div id="rotate" aria-hidden="true">
     <svg viewBox="0 0 100 100" width="72" height="72"><rect x="32" y="12" width="36" height="64" rx="7" fill="none" stroke="#fff" stroke-width="6"/><path d="M14 84h72M76 76l10 8-10 8" fill="none" stroke="#ffc93c" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <p>Putar HP ke posisi tegak ya</p>
   </div>
 
-  <div id="gagal" role="alert" hidden>
+  <div id="load-failed" role="alert" hidden>
     <p>Permainan belum termuat semua. Periksa internet, lalu muat ulang.</p>
-    <button class="tb" type="button" id="muat-ulang">Muat ulang</button>
+    <button class="btn" type="button" id="reload">Muat ulang</button>
   </div>
 
-  <noscript><p class="tanpa-js">Permainan ini memerlukan JavaScript. Aktifkan JavaScript di peramban, lalu muat ulang halaman.</p></noscript>
+  <noscript><p class="no-js">Permainan ini memerlukan JavaScript. Aktifkan JavaScript di peramban, lalu muat ulang halaman.</p></noscript>
 
-  <script defer src="js/versi.js"></script>
-  <script defer src="js/teks.js"></script>
-  <script defer src="js/alat.js"></script>
-  <script defer src="js/seni.js"></script>
+  <script defer src="js/version.js"></script>
+  <script defer src="js/strings.js"></script>
+  <script defer src="js/util.js"></script>
+  <script defer src="js/art.js"></script>
   <script defer src="js/audio.js"></script>
-  <script defer src="js/game/teh.js"></script>
-  <script defer src="js/game/danau.js"></script>
-  <script defer src="js/game/rimba.js"></script>
-  <script defer src="js/game/rentak.js"></script>
-  <script defer src="js/game/pasar.js"></script>
-  <script defer src="js/game/gunung.js"></script>
+  <script defer src="js/game/tea.js"></script>
+  <script defer src="js/game/lake.js"></script>
+  <script defer src="js/game/forest.js"></script>
+  <script defer src="js/game/rhythm.js"></script>
+  <script defer src="js/game/market.js"></script>
+  <script defer src="js/game/mountain.js"></script>
   <script defer src="js/main.js"></script>
 </body>
 </html>

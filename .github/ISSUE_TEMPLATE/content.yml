@@ -1,0 +1,34 @@
+name: Content correction or idea
+description: Correct a Kerinci word or a fact, or propose a new place or game
+labels: [content]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Corrections from people of Kerinci help the most. Do not include anyone's personal
+        data: naming the village or district is enough.
+        Indonesian or English are both fine.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - A word in the Kerinci language
+        - A fact
+        - A new place or game
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: The correction or the idea
+      description: For a correction, write what the game says now and what it should say.
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source
+      description: The village or district the word is from, or the book or site that has the fact.
+      placeholder: The Sungai Penuh dialect

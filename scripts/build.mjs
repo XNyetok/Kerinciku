@@ -8,55 +8,55 @@
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { basename, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { BATAS_UKURAN, SITUS } from './situs.mjs';
+import { SITE_FILES, SIZE_BUDGET } from './site.mjs';
 
-const akar = resolve(fileURLToPath(new URL('..', import.meta.url)));
-const keluar = resolve(process.argv[2] || join(akar, 'dist'));
+const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
+const out = resolve(process.argv[2] || join(root, 'dist'));
 const label = process.env.BUILD_LABEL || 'dev';
 
-function gagal(pesan) {
-  console.error(`build: ${pesan}`);
+function fail(message) {
+  console.error(`build: ${message}`);
   process.exit(1);
 }
 
-if (!/^[0-9A-Za-z.+-]{1,60}$/.test(label)) gagal(`bad BUILD_LABEL: ${label}`);
+if (!/^[0-9A-Za-z.+-]{1,60}$/.test(label)) fail(`bad BUILD_LABEL: ${label}`);
 // The output folder is emptied first, so it must not be the repository or anything in it but dist/.
-const dalam = keluar.startsWith(akar + sep) ? relative(akar, keluar).split(sep)[0] : null;
-if (keluar === akar || akar.startsWith(keluar + sep) || (dalam !== null && dalam !== 'dist')) {
-  gagal(`refusing to build into ${keluar}`);
+const inside = out.startsWith(root + sep) ? relative(root, out).split(sep)[0] : null;
+if (out === root || root.startsWith(out + sep) || (inside !== null && inside !== 'dist')) {
+  fail(`refusing to build into ${out}`);
 }
 
-rmSync(keluar, { recursive: true, force: true });
-mkdirSync(keluar, { recursive: true });
-for (const nama of SITUS) {
-  if (!existsSync(join(akar, nama))) gagal(`${nama} is missing`);
+rmSync(out, { recursive: true, force: true });
+mkdirSync(out, { recursive: true });
+for (const name of SITE_FILES) {
+  if (!existsSync(join(root, name))) fail(`${name} is missing`);
   // Hidden files (.DS_Store and the like) are never published.
-  cpSync(join(akar, nama), join(keluar, nama), { recursive: true, filter: (src) => !basename(src).startsWith('.') });
+  cpSync(join(root, name), join(out, name), { recursive: true, filter: (src) => !basename(src).startsWith('.') });
 }
 
-function semuaBerkas(dir) {
+function allFiles(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
-    e.isDirectory() ? semuaBerkas(join(dir, e.name)) : [join(dir, e.name)],
+    e.isDirectory() ? allFiles(join(dir, e.name)) : [join(dir, e.name)],
   );
 }
 
 /** Replace exactly one occurrence, or stop: a stamp that silently misses is worse than no build. */
-function cap(berkas, dari, jadi) {
-  const jalur = join(keluar, berkas);
-  const isi = readFileSync(jalur, 'utf8');
-  if (isi.split(dari).length !== 2) gagal(`${berkas}: expected exactly one "${dari}"`);
-  writeFileSync(jalur, isi.replace(dari, () => jadi));
+function stamp(file, from, to) {
+  const path = join(out, file);
+  const text = readFileSync(path, 'utf8');
+  if (text.split(from).length !== 2) fail(`${file}: expected exactly one "${from}"`);
+  writeFileSync(path, text.replace(from, () => to));
 }
 
-const berkas = semuaBerkas(keluar).map((f) => relative(keluar, f).split(sep).join('/')).sort();
-const simpanan = ['./', ...berkas.filter((f) => f !== 'sw.js')];
+const files = allFiles(out).map((f) => relative(out, f).split(sep).join('/')).sort();
+const cached = ['./', ...files.filter((f) => f !== 'sw.js')];
 
-cap('js/versi.js', "JK.versi = 'dev';", `JK.versi = ${JSON.stringify(label)};`);
+stamp('js/version.js', "JK.version = 'dev';", `JK.version = ${JSON.stringify(label)};`);
 if (label !== 'dev') {
-  cap('sw.js', "var VERSI = 'dev';", `var VERSI = ${JSON.stringify(label)};`);
-  cap('sw.js', 'var BERKAS = [];', `var BERKAS = ${JSON.stringify(simpanan)};`);
+  stamp('sw.js', "var VERSION = 'dev';", `var VERSION = ${JSON.stringify(label)};`);
+  stamp('sw.js', 'var FILES = [];', `var FILES = ${JSON.stringify(cached)};`);
 }
 
-const ukuran = semuaBerkas(keluar).reduce((n, f) => n + statSync(f).size, 0);
-console.log(`build: ${label}, ${berkas.length} files, ${(ukuran / 1024).toFixed(1)} KB -> ${relative(akar, keluar) || keluar}`);
-if (ukuran > BATAS_UKURAN) gagal(`the site is ${ukuran} bytes, over the ${BATAS_UKURAN} byte budget`);
+const size = allFiles(out).reduce((n, f) => n + statSync(f).size, 0);
+console.log(`build: ${label}, ${files.length} files, ${(size / 1024).toFixed(1)} KB -> ${relative(root, out) || out}`);
+if (size > SIZE_BUDGET) fail(`the site is ${size} bytes, over the ${SIZE_BUDGET} byte budget`);

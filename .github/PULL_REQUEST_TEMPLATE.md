@@ -1,17 +1,18 @@
-## Apa yang berubah
+## What this changes
 
-<!-- Dua atau tiga kalimat. Apa yang berbeda bagi pemain, dan mengapa. -->
+<!-- Two or three sentences. What is different for a player, and why. -->
 
-## Cara memeriksanya
+## How it was checked
 
-<!-- Langkah yang Anda coba, atau perintah yang dijalankan. "Kelihatannya baik" bukan pemeriksaan. -->
+<!-- Manual steps, or the command you ran. "Looks fine" is not a check. -->
 
-## Daftar periksa
+## Checklist
 
-- [ ] Tidak ada rahasia, token, berkas `.env`, atau alamat server di dalam perubahan
-- [ ] Tidak ada data pribadi: e-mail, nomor telepon, jalur folder komputer, tangkapan layar berisi orang lain
-- [ ] Gambar dan bunyi baru buatan sendiri atau berlisensi jelas
-- [ ] Fakta baru tentang Kerinci disertai sumber; kata bahasa Kerinci disertai dusun asalnya
-- [ ] `npm run check && npm test` lulus; `npm run test:e2e` lulus bila permainan berubah
+- [ ] No secrets, tokens, `.env` files, or server addresses in the diff
+- [ ] No personal data: e-mail addresses, phone numbers, folder paths from a computer, screenshots showing other people
+- [ ] New pictures and sounds are self-made or properly licensed
+- [ ] New facts about Kerinci come with a source; Kerinci words come with the village they are from
+- [ ] Interface text is in Indonesian and in `js/strings.js`
+- [ ] `npm run check && npm test` pass; `npm run test:e2e` passes when the game changed
 
-<!-- Tulis dengan bahasa biasa. Tanpa catatan "dibuat dengan", tanpa emoji. -->
+<!-- Keep the description plain. No generated-by footers, no emoji. -->
