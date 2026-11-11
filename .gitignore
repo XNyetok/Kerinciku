@@ -1,0 +1,75 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+out/
+coverage/
+*.log
+
+# Environment and local configuration
+.env
+.env.*
+!.env.example
+*.local
+config.local.*
+settings.local.*
+
+# Secrets and credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.kdbx
+*.ovpn
+id_rsa*
+id_ed25519*
+credentials.json
+client_secret*.json
+service-account*.json
+.npmrc
+.netrc
+.htpasswd*
+known_hosts
+authorized_keys
+secrets/
+.secrets/
+
+# Databases, dumps and backups
+*.sqlite
+*.sqlite3
+*.db
+*.sql
+*.dump
+*.bak
+dumps/
+backups/
+
+# Notes, drafts and assets that are not cleared for publication.
+# Everything shipped publicly must be self-made or licensed.
+/private/
+/catatan/
+/assets-private/
+/design-private/
+
+# Editor and OS
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Tooling caches
+.gitleaks-cache/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

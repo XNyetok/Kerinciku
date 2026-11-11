@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+#
+# Pre-commit gate: nothing leaves this machine with a secret or personal data
+# attached. Installed by `git config core.hooksPath .githooks`
+# (see scripts/setup-hooks.sh).
+
+set -euo pipefail
+
+fail() {
+  printf '\n%s\n\n' "$1" >&2
+  exit 1
+}
+
+cd "$(git rev-parse --show-toplevel)"
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  fail "gitleaks is not installed. Install it with: brew install gitleaks"
+fi
+
+# 1. File names that should never be tracked, oversized files, and personal
+#    data inside the staged files (home folders, e-mail addresses, server
+#    addresses, phone and identity numbers).
+scripts/check-privacy.sh --staged --show \
+  || fail "The privacy check refused this commit. Remove the data or replace it with a placeholder."
+
+# 2. Scan the staged diff for credentials.
+gitleaks git --staged --redact --no-banner --config .gitleaks.toml \
+  || fail "gitleaks found something that looks like a secret. Fix or rotate it before committing."
+
+# 3. Checks that only make sense on one machine (a maintainer's own list of
+#    things that must not be published) live outside the repository.
+if [ -x .githooks/pre-commit.local ]; then
+  .githooks/pre-commit.local || fail "The local check refused this commit."
+fi
+
+exit 0
