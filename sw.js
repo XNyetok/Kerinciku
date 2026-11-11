@@ -1,27 +1,28 @@
 /*
- * Service worker: menyimpan berkas permainan supaya tetap bisa dimainkan tanpa
- * internet setelah dibuka sekali.
+ * Service worker: keeps the game's files on the device, so it still plays
+ * without a connection after one visit.
  *
- * VERSI dan BERKAS diisi oleh scripts/build.mjs saat rilis; jangan diisi tangan.
+ * VERSION and FILES are filled in by scripts/build.mjs for a release; do not
+ * fill them in by hand.
  *
- * - Rilis (VERSI berisi nomor versi): semua berkas disimpan saat pemasangan dan
- *   dilayani dari simpanan. Rilis baru mengubah isi berkas ini, sehingga HP
- *   mengunduh semuanya lagi ke simpanan baru lalu membuang yang lama.
- * - Pengembangan (VERSI = 'dev'): jaringan dulu, simpanan hanya cadangan saat
- *   luring, supaya perubahan langsung terlihat.
+ * - Release (VERSION holds a version number): every file is stored on install
+ *   and served from the cache. A new release changes this file, so the phone
+ *   downloads everything again into a new cache and drops the old one.
+ * - Development (VERSION = 'dev'): network first, the cache only as a fallback
+ *   when offline, so a change shows up immediately.
  */
-var VERSI = 'dev';
-var BERKAS = [];
+var VERSION = 'dev';
+var FILES = [];
 
-var NAMA = 'jelajah-kerinci-' + VERSI;
-var RILIS = VERSI !== 'dev';
+var CACHE = 'jelajah-kerinci-' + VERSION;
+var RELEASE = VERSION !== 'dev';
 
 self.addEventListener('install', function (e) {
   e.waitUntil(
-    caches.open(NAMA)
+    caches.open(CACHE)
       .then(function (c) {
-        // 'reload' melewati simpanan HTTP peramban, supaya yang tersimpan pasti berkas rilis ini.
-        return c.addAll(BERKAS.map(function (u) { return new Request(u, { cache: 'reload' }); }));
+        // 'reload' skips the browser's HTTP cache, so what is stored is certainly this release.
+        return c.addAll(FILES.map(function (u) { return new Request(u, { cache: 'reload' }); }));
       })
       .then(function () { return self.skipWaiting(); })
   );
@@ -30,22 +31,22 @@ self.addEventListener('install', function (e) {
 self.addEventListener('activate', function (e) {
   e.waitUntil(
     caches.keys()
-      .then(function (nama) {
-        return Promise.all(nama.filter(function (n) { return n !== NAMA; }).map(function (n) { return caches.delete(n); }));
+      .then(function (names) {
+        return Promise.all(names.filter(function (n) { return n !== CACHE; }).map(function (n) { return caches.delete(n); }));
       })
       .then(function () { return self.clients.claim(); })
   );
 });
 
-function simpan(req, res) {
+function store(req, res) {
   if (res && res.ok) {
-    var salinan = res.clone();
-    caches.open(NAMA).then(function (c) { c.put(req, salinan); });
+    var copy = res.clone();
+    caches.open(CACHE).then(function (c) { c.put(req, copy); });
   }
   return res;
 }
 
-function dariSimpanan(req) {
+function fromCache(req) {
   return caches.match(req, { ignoreSearch: true });
 }
 
@@ -53,18 +54,18 @@ self.addEventListener('fetch', function (e) {
   var req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
 
-  if (RILIS) {
-    e.respondWith(dariSimpanan(req).then(function (ada) {
-      return ada || fetch(req).then(function (res) { return simpan(req, res); });
+  if (RELEASE) {
+    e.respondWith(fromCache(req).then(function (hit) {
+      return hit || fetch(req).then(function (res) { return store(req, res); });
     }));
     return;
   }
 
   e.respondWith(
     fetch(req)
-      .then(function (res) { return simpan(req, res); })
+      .then(function (res) { return store(req, res); })
       .catch(function () {
-        return dariSimpanan(req).then(function (ada) { return ada || Response.error(); });
+        return fromCache(req).then(function (hit) { return hit || Response.error(); });
       })
   );
 });

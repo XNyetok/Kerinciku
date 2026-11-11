@@ -1,143 +1,142 @@
 # Jelajah Kerinci
 
-Permainan browser untuk anak SD kelas 1-3 di Kerinci. Anak menjelajahi peta Kerinci,
-memainkan mini-game pendek di tiap tempat, dan mengumpulkan stempel. Setiap stempel
-membuka satu fakta singkat dan satu kata bahasa Kerinci.
+A browser game for children in the first years of primary school in Kerinci, Sumatra.
+They explore a map of Kerinci, play a short mini-game at each place, and collect stamps.
+Every stamp opens one short fact and one word in the Kerinci language.
 
-**[Mainkan di kerinciku.web.id →](https://kerinciku.web.id)**
+**[Play it at kerinciku.web.id →](https://kerinciku.web.id)**
 
 [![CI](https://github.com/XNyetok/Kerinciku/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/XNyetok/Kerinciku/actions/workflows/ci.yml)
-[![Lisensi: MIT](https://img.shields.io/badge/lisensi-MIT-2f9e5b)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-2f9e5b)](LICENSE)
 
-| Peta | Permainan |
+| Map | A game |
 | --- | --- |
-| ![Peta Kerinci dengan enam tempat](docs/media/peta.png) | ![Satwa mengintip dari balik semak di rimba](docs/media/rimba.png) |
+| ![The map of Kerinci with six places](docs/media/map.png) | ![Animals peeking out of the bushes in the forest](docs/media/forest.png) |
 
-Dirancang untuk HP Android (layar sentuh, posisi tegak), tetapi juga berjalan di laptop.
-Seluruh permainan berukuran sekitar 150 KB dan, setelah dibuka sekali, bisa dimainkan
-tanpa internet.
+The game is in Indonesian, with words in the Kerinci language. It is designed for Android
+phones held upright, and also runs on a laptop. The whole site is about 150 KB and, after
+one visit, plays without a connection.
 
-## Isi permainan
+## What is in it
 
-| Tempat di peta | Mini-game | Cara main |
+| Place on the map | Mini-game | How it plays |
 | --- | --- | --- |
-| Kayu Aro | Petik Teh | Sentuh pucuk teh yang muncul, jangan sentuh ulat (40 detik). |
-| Rimba TNKS | Potret Satwa | Sentuh satwa yang mengintip dari semak sampai lima satwa terpotret. |
-| Rentak Kudo | Ikuti Irama | Lihat dan dengar urutan bunyi alat musik, lalu ulangi (4 babak). |
-| Sungai Penuh | Cari Pasangan | Kartu memori hasil bumi Kerinci, 6 pasang. |
-| Danau Kerinci | Tangkap Ikan | Geser perahu untuk menangkap ikan, hindari eceng gondok (40 detik). |
-| Gunung Kerinci | Mendaki Gunung | Terbuka setelah 5 stempel lain terkumpul. Sentuh layar untuk melangkah sampai puncak. |
+| Kayu Aro | Petik Teh (tea picking) | Tap the tea shoots that pop up, leave the caterpillars alone (40 seconds). |
+| Rimba TNKS | Potret Satwa (wildlife photos) | Tap the animals peeking out of the bushes until all five are photographed. |
+| Rentak Kudo | Ikuti Irama (rhythm) | Watch and hear a pattern of instruments, then repeat it (4 rounds). |
+| Sungai Penuh | Cari Pasangan (memory cards) | Find the six pairs of Kerinci's produce. |
+| Danau Kerinci | Tangkap Ikan (fishing) | Slide the boat to catch fish, steer clear of the water hyacinth (40 seconds). |
+| Gunung Kerinci | Mendaki Gunung (the climb) | Opens once the other five stamps are collected. Tap to walk up to the summit. |
 
-Tidak ada "kalah". Setiap game selalu memberi stempel dengan 1 sampai 3 bintang, dan anak
-boleh mengulang untuk menambah bintang.
+No game can be lost. Each one always gives a stamp with one to three stars, and a child
+may replay it for more stars.
 
-## Menjalankan di komputer
+## Running it locally
 
-Tidak ada yang perlu di-build. Cara termudah adalah membuka `index.html` langsung di
-browser.
+Nothing needs building. The simplest way is to open `index.html` in a browser.
 
-Untuk menjalankannya seperti di situs aslinya, dengan aturan keamanan yang sama, pakai
-server kecil bawaan proyek (perlu Node 22 atau lebih baru):
+To run it the way the live site does, with the same security policy, use the small server
+that comes with the project (Node 22 or newer):
 
 ```sh
 npm install
 npm run serve        # http://127.0.0.1:8765
 ```
 
-## Memeriksa perubahan
+## Checking a change
 
 ```sh
-npm run check        # berkas, tempat di peta, dan aturan keamanan saling cocok
-npm test             # jam permainan, build, skrip deploy, pemeriksa privasi
-npm run test:e2e     # memainkan keenam game di browser (HP dan desktop)
-npm run build        # menyalin situs ke dist/ dan memeriksa ukurannya
+npm run check        # files, places on the map and the security policy agree
+npm test             # the game clock, saved progress, the build, the deploy script, the privacy check
+npm run test:e2e     # plays all six games in a browser (phone and desktop)
+npm run build        # copies the site into dist/ and checks its size
 ```
 
-Uji browser memerlukan Chromium sekali saja: `npx playwright install chromium`.
+The browser tests need Chromium once: `npx playwright install chromium`.
 
-## Mengubah teks dan kata bahasa Kerinci
+## Text and the Kerinci language
 
-Semua teks ada di `js/teks.js`. Kata bahasa Kerinci yang belum diperiksa penutur asli
-diberi tanda `// PERIKSA`:
+Everything a player reads is in `js/strings.js`, in Indonesian, and nowhere else. Words in
+the Kerinci language that no native speaker has confirmed yet are marked `// CHECK`:
 
-| Kata | Arti yang dipakai | Di mana |
+| Word | Meaning used | Where |
 | --- | --- | --- |
-| Apo kabar, uhang Kincai? | Apa kabar, orang Kerinci? | Halaman depan |
-| aro | pohon ara, sejenis beringin | Kayu Aro |
-| imbo | hutan | Rimba TNKS |
-| kulit manih | kayu manis | Sungai Penuh |
-| ayik | air | Danau Kerinci |
+| Apo kabar, uhang Kincai? | How are you, people of Kerinci? | Title screen |
+| aro | a fig tree, a kind of banyan | Kayu Aro |
+| imbo | forest | Rimba TNKS |
+| kulit manih | cinnamon | Sungai Penuh |
+| ayik | water | Danau Kerinci |
 
-Dialek tiap dusun berbeda. Koreksi dari penutur asli sangat diharapkan: buka *issue* atau
-kirim *pull request* yang mengubah `js/teks.js`.
+Dialects differ from village to village. Corrections from native speakers are very
+welcome: open an issue, or send a pull request that changes `js/strings.js`.
 
-Fakta tiap tempat (`fakta`) dan ketinggian pos pendakian (`pos`) juga ada di berkas yang
-sama. Ketinggian pos selain puncak adalah angka kira-kira.
+The fact shown at each place (`fact`) and the heights of the posts on the climb
+(`mountain.posts`) are in the same file. Every height but the summit's is approximate.
 
-## Susunan berkas
+## Layout
 
 ```
-index.html              halaman tunggal
-css/style.css           seluruh tampilan
-js/teks.js              semua teks, daftar tempat, kata Kerinci
-js/alat.js              alat bantu, simpanan stempel, jam permainan
-js/seni.js              semua gambar (SVG), termasuk peta
-js/audio.js             bunyi (Web Audio) dan pembacaan teks
-js/main.js              alur layar: beranda, peta, pengantar, permainan, hasil, buku stempel
-js/game/*.js            satu berkas untuk tiap mini-game
-js/muat.js, js/versi.js pesan bila berkas gagal dimuat, dan nomor versi
-sw.js                   mode luring
-manifest.webmanifest    data aplikasi untuk "Pasang ke layar utama"
-icons/                  ikon aplikasi
+index.html              the single page
+css/style.css           all styling
+js/strings.js           all interface text, the list of places, the Kerinci words
+js/util.js              helpers, saved progress, the game clock
+js/art.js               every picture (SVG), including the map
+js/audio.js             sounds (Web Audio) and reading text aloud
+js/main.js              the screens: title, map, introduction, game, result, stamp book
+js/game/*.js            one file per mini-game
+js/boot.js              the reload prompt when a file fails to load
+js/version.js           the version number, stamped by the build
+sw.js                   offline play
+manifest.webmanifest    what "Add to home screen" uses
+icons/                  app icons
 
-scripts/                build, server lokal, pemeriksaan
-tests/                  uji unit dan uji browser
-deploy/                 skrip dan konfigurasi server
-docs/deploy.md          cara rilis dan deploy
+scripts/                build, local server, checks
+tests/                  unit tests and browser tests
+deploy/                 server script and nginx config
+docs/deploy.md          how a release reaches the server
 ```
 
-Tidak ada pustaka luar, berkas gambar, atau berkas suara di dalam permainan. Gambar dibuat
-dari SVG dan bunyi dibuat oleh browser, sehingga ukuran unduhan kecil.
+The game ships no libraries, image files or sound files. Pictures are drawn in SVG and
+sounds are synthesised by the browser, which is what keeps the download small.
 
-## Menambah mini-game baru
+## Adding a mini-game
 
-1. Tambahkan satu entri di `JK.lokasi` (`js/teks.js`): `id`, `ikon`, `warna`, letak pin
-   `x`/`y` di peta (ukuran peta 360 x 500), nama, cara main, fakta, dan kata Kerinci.
-   Tambahkan juga teks hasilnya di `JK.teks.hasil`.
-2. Buat `js/game/<id>.js` yang mendaftarkan `JK.game.<id> = function (g) { ... }`. Objek
-   `g` berisi:
-   - `g.panggung`: elemen tempat menggambar permainan.
-   - `g.sesi`: jam permainan. Pakai `g.sesi.tunda(fn, ms)` untuk jeda dan
-     `g.sesi.tiap(fn)` untuk gerak tiap bingkai, jangan `setTimeout`, supaya permainan ikut
-     berhenti saat dijeda atau ditinggalkan.
-   - `g.skor(nilai)` dan `g.waktu(0..1)`: memperbarui angka dan batang di bagian atas.
-   - `g.selesai({ bintang: 1..3, pesan: '...' })`: mengakhiri permainan dan membuka layar
-     hasil.
-3. Tambahkan `<script>` berkas itu di `index.html`.
+1. Add an entry to `JK.places` in `js/strings.js`: `id`, `icon`, `color`, the pin's `x`
+   and `y` on the map (the map is 360 x 500), the titles, how to play, the fact and the
+   Kerinci word. Add its result sentence to `JK.text.result`.
+2. Create `js/game/<id>.js` that registers `JK.game.<id> = function (g) { ... }`. The
+   object `g` has:
+   - `g.stage`: the element the game draws into.
+   - `g.clock`: the game clock. Use `g.clock.after(fn, ms)` for delays and
+     `g.clock.each(fn)` for per-frame movement, not `setTimeout`, so the game stops when it
+     is paused or left.
+   - `g.score(value)` and `g.progress(0..1)`: update the number and the bar at the top.
+   - `g.finish({ stars: 1..3, message: '...' })`: end the game and open the result screen.
+3. Add the file's `<script>` to `index.html`.
 
-`npm run check` memberi tahu bila ada langkah yang terlewat. Daftar berkas untuk mode
-luring dan nomor versinya diisi otomatis saat rilis.
+`npm run check` says what is missing. The list of files to cache for offline play and the
+version number are filled in by the build.
 
-Situs aslinya tidak mengizinkan skrip atau gaya sebaris (*Content-Security-Policy*):
-jangan menulis atribut `style="..."` atau `onclick="..."` di dalam HTML yang dibuat lewat
-JavaScript. Pakai `el.style` dan `el.onclick`.
+The live site allows no inline script or style (Content-Security-Policy): do not write
+`style="..."` or `onclick="..."` into markup built in JavaScript. Use `el.style` and
+`el.onclick`.
 
-## Catatan
+## Notes
 
-- Stempel dan setelan suara disimpan di HP masing-masing (`localStorage`). Tombol "Mulai
-  dari awal" ada di Buku Stempel. Permainan tidak mengirim data apa pun ke server.
-- Pembacaan teks ("Dengarkan") memakai suara bawaan HP dan hanya berbunyi bila HP punya
-  suara bahasa Indonesia.
-- Bila ada berkas yang gagal dimuat (misalnya sinyal lemah), muncul pesan dengan tombol
-  "Muat ulang" supaya layar tidak macet.
-- Aksara Incung belum dimasukkan karena bentuk hurufnya harus diambil dari sumber yang
-  benar, bukan digambar dari ingatan.
+- Stamps and the sound setting are kept on the player's own device (`localStorage`). The
+  stamp book has a "start over" button. The game sends nothing to a server.
+- Reading text aloud uses the device's own voices, and only speaks when the device has an
+  Indonesian voice.
+- When a file fails to load (a weak signal, for example), a message with a reload button
+  appears instead of a frozen screen.
+- The Incung script is not in the game yet: its letters have to come from a proper source,
+  not be drawn from memory.
 
-## Ikut membantu
+## Contributing
 
-Lihat [CONTRIBUTING.md](CONTRIBUTING.md). Masalah keamanan dilaporkan lewat
-[SECURITY.md](SECURITY.md), bukan lewat *issue* publik.
+See [CONTRIBUTING.md](CONTRIBUTING.md). Report security problems through
+[SECURITY.md](SECURITY.md), not in a public issue.
 
-## Lisensi
+## License
 
 [MIT](LICENSE).

@@ -2,7 +2,7 @@
   "name": "kerinciku",
   "private": true,
   "version": "0.0.0",
-  "description": "Jelajah Kerinci: permainan browser untuk anak-anak tentang alam dan budaya Kerinci.",
+  "description": "Jelajah Kerinci: a browser game for children about the nature and culture of Kerinci.",
   "license": "MIT",
   "engines": {
     "node": ">=22"

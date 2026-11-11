@@ -51,7 +51,7 @@ backups/
 # Notes, drafts and assets that are not cleared for publication.
 # Everything shipped publicly must be self-made or licensed.
 /private/
-/catatan/
+/notes-private/
 /assets-private/
 /design-private/
 

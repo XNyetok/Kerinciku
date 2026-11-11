@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Laporan keamanan
+  - name: Security report
     url: https://github.com/XNyetok/Kerinciku/blob/main/SECURITY.md
-    about: Celah keamanan dan data yang bocor dilaporkan secara tertutup, bukan lewat issue publik.
+    about: Report vulnerabilities and leaked data privately, not in a public issue.

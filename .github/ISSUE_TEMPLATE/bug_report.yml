@@ -1,29 +1,30 @@
-name: Laporan masalah
-description: Ada yang tidak berjalan sebagaimana mestinya
+name: Bug report
+description: Something behaves differently than it should
 labels: [bug]
 body:
   - type: markdown
     attributes:
       value: |
-        Jangan menempelkan rahasia, data pribadi, atau tangkapan layar pribadi di sini.
-        Repositori ini publik. Masalah keamanan dikirim ke alamat di SECURITY.md.
+        Do not paste secrets, personal data, or private screenshots here.
+        This repository is public. Security issues go to the address in SECURITY.md.
+        Indonesian or English are both fine.
   - type: textarea
     id: what-happened
     attributes:
-      label: Apa yang terjadi
-      description: Ceritakan sesederhana mungkin.
+      label: What happened
+      description: The observed behaviour, as plainly as possible.
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
-      label: Apa yang seharusnya terjadi
+      label: What you expected
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: Langkah untuk mengulanginya
+      label: Steps to reproduce
       placeholder: |
         1.
         2.
@@ -33,27 +34,27 @@ body:
   - type: dropdown
     id: where
     attributes:
-      label: Di bagian mana
+      label: Where in the game
       options:
-        - Halaman depan atau peta
+        - Title screen or map
         - Petik Teh (Kayu Aro)
         - Potret Satwa (Rimba TNKS)
         - Ikuti Irama (Rentak Kudo)
         - Cari Pasangan (Sungai Penuh)
         - Tangkap Ikan (Danau Kerinci)
         - Mendaki Gunung (Gunung Kerinci)
-        - Buku Stempel
-        - Lainnya
+        - Stamp book
+        - Somewhere else
     validations:
       required: true
   - type: input
     id: environment
     attributes:
-      label: Perangkat dan browser
-      placeholder: HP Android 11, Chrome 130
+      label: Device and browser
+      placeholder: Android 11 phone, Chrome 130
   - type: input
     id: version
     attributes:
-      label: Versi permainan
-      description: Tertulis kecil di bawah tombol "Main" pada halaman depan.
+      label: Game version
+      description: Shown in small print under the "Main" button on the title screen.
       placeholder: v1.0.0

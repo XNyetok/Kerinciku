@@ -3,7 +3,7 @@ name: Release
 # Push a tag like v0.4.0 → every CI check runs on it, and a DRAFT GitHub Release
 # is created with the built site and its SHA-256 sum. Nothing reaches players
 # until a maintainer reviews the draft and publishes it; that starts deploy.yml
-# (docs/deploy.md, Merilis).
+# (docs/deploy.md, Releasing).
 on:
   push:
     tags: ['v*.*.*']

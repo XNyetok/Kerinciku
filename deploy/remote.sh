@@ -53,7 +53,7 @@ activate() {
   [[ "$release" =~ ^[0-9]{14}-[0-9a-f]{7}$ ]] || die "bad release name: $release"
   check_root "$site"
   # A release is complete only with the page and the worker that caches it.
-  for file in index.html sw.js js/versi.js; do
+  for file in index.html sw.js js/version.js; do
     [ -f "$site/releases/$release/$file" ] || die "release $release was not uploaded completely: $file is missing"
   done
 

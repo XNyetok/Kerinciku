@@ -1,49 +1,48 @@
-# Kebijakan keamanan
+# Security Policy
 
-## Melaporkan celah keamanan
+## Reporting a vulnerability
 
-Kirim e-mail ke **debi@elysiumx.org** berisi rinciannya. Mohon jangan membuka *issue*
-publik untuk hal yang bisa disalahgunakan sebelum diperbaiki.
+Email **debi@elysiumx.org** with the details. Please do not open a public issue for
+anything that could be exploited before it is fixed.
 
-Sertakan:
+Include:
 
-- apa masalahnya dan di mana letaknya (berkas, alamat, atau commit)
-- cara mengulanginya, atau contoh pembuktian
-- dampak yang Anda perkirakan
+- what the issue is and where it lives (file, address, or commit)
+- how to reproduce it, or a proof of concept
+- the impact you think it has
 
-Laporan akan dijawab dalam beberapa hari. Proyek ini dikelola satu orang, jadi mohon beri
-waktu yang wajar sebelum mengumumkannya.
+You can expect an acknowledgement within a few days. This is a solo project, so please
+allow reasonable time before disclosing publicly.
 
-## Rahasia atau data pribadi yang bocor
+## Leaked credentials or personal data
 
-Bila Anda melihat rahasia atau data pribadi seseorang terbit di repositori ini, kirim
-e-mail ke alamat di atas dengan nomor commit-nya. Jangan mengutip isinya dan jangan
-membuka *issue* publik: repositori ini publik, dan setiap *issue* bisa ditemukan mesin
-pencari.
+If you notice a secret or someone's personal data published in this repository, email the
+address above with the commit hash. Do not quote it and do not open a public issue: it is
+a public repository, and every issue is indexable.
 
-## Data yang dikumpulkan permainan
+## Data collected by the game
 
-Tidak ada. Permainan tidak mengirim apa pun ke server selain meminta berkasnya sendiri:
-tidak ada analitik, kuki, akun, iklan, atau pustaka pihak ketiga. Stempel dan setelan suara
-disimpan di perangkat pemain (`localStorage`) dan tidak pernah keluar dari sana.
+None. The game sends nothing to a server beyond requesting its own files: no analytics,
+no cookies, no accounts, no advertising, no third-party libraries. Stamps and the sound
+setting are kept on the player's device (`localStorage`) and never leave it.
 
-Pemain permainan ini adalah anak-anak. Bila Anda yakin situs yang berjalan berperilaku
-lain dari uraian di atas, itu masalah yang layak dilaporkan.
+The players of this game are children. If you believe the running site behaves
+differently from this, that is a bug worth reporting.
 
-## Cakupan
+## Scope
 
-Laporan yang relevan antara lain:
+Relevant reports include, but are not limited to:
 
-- rahasia atau data pribadi yang masuk ke repositori atau riwayatnya
-- penyisipan skrip (*cross-site scripting*) atau pelonggaran *Content-Security-Policy*
-- pembobolan lewat dependensi atau alur build dan deploy
-- aset tak berlisensi yang ikut terbit
+- secrets or personal data committed to the repository or its history
+- script injection (cross-site scripting), or a weakened Content-Security-Policy
+- dependency, build or deploy pipeline compromise
+- unlicensed assets shipped in the repository
 
-## Di luar cakupan
+## Not in scope
 
-- temuan yang memerlukan browser yang dimodifikasi atau perangkat yang sudah dikuasai
-- keluaran pemindai otomatis tanpa cara mengulanginya
+- findings that require a modified browser or an already-compromised machine
+- automated scanner output pasted without a reproduction
 
-## Versi yang didukung
+## Supported versions
 
-Hanya rilis terbaru yang menerima perbaikan.
+Only the latest release receives fixes.

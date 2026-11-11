@@ -2,7 +2,7 @@
 // build, the local server and the checks, so they cannot drift apart.
 
 /** Top-level files and folders that are published. Everything else stays in the repository. */
-export const SITUS = ['index.html', 'manifest.webmanifest', 'sw.js', 'css', 'js', 'icons'];
+export const SITE_FILES = ['index.html', 'manifest.webmanifest', 'sw.js', 'css', 'js', 'icons'];
 
 /**
  * The Content-Security-Policy of the live site (deploy/nginx/). No inline script
@@ -23,7 +23,7 @@ export const CSP = [
   "object-src 'none'",
 ].join('; ');
 
-export const KEPALA = {
+export const HEADERS = {
   'Content-Security-Policy': CSP,
   'X-Frame-Options': 'DENY',
   'X-Content-Type-Options': 'nosniff',
@@ -33,4 +33,4 @@ export const KEPALA = {
 };
 
 /** Download budget for the whole site, in bytes. The game is played on cheap phones with weak signal. */
-export const BATAS_UKURAN = 400 * 1024;
+export const SIZE_BUDGET = 400 * 1024;

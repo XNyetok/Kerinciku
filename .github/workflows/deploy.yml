@@ -61,10 +61,10 @@ jobs:
           mkdir dist
           tar -xzf release/kerinciku-site-*.tar.gz -C dist
           # The archive must be the site, built for this tag, and nothing else.
-          for file in index.html sw.js js/versi.js; do
+          for file in index.html sw.js js/version.js; do
             [ -f "dist/$file" ] || { echo "::error::the site file has no $file"; exit 1; }
           done
-          grep -qF "JK.versi = \"${TAG#v}+" dist/js/versi.js \
+          grep -qF "JK.version = \"${TAG#v}+" dist/js/version.js \
             || { echo "::error::the site file was not built for $TAG"; exit 1; }
 
       - name: Check deploy settings
@@ -158,11 +158,11 @@ jobs:
 
           # What is live must be this release, not just any page: the version file
           # and the service worker both carry the build label.
-          label=$(grep -oE 'JK\.versi = "[^"]+"' dist/js/versi.js)
-          live=$(curl -fsS -H 'Cache-Control: no-cache' "${SITE}/js/versi.js?smoke=${GITHUB_RUN_ID}")
+          label=$(grep -oE 'JK\.version = "[^"]+"' dist/js/version.js)
+          live=$(curl -fsS -H 'Cache-Control: no-cache' "${SITE}/js/version.js?smoke=${GITHUB_RUN_ID}")
           grep -qF "$label" <<<"$live" || { echo "::error::the live site is not $label"; exit 1; }
           worker=$(curl -fsS -H 'Cache-Control: no-cache' "${SITE}/sw.js?smoke=${GITHUB_RUN_ID}")
-          grep -qF "var VERSI = \"${label#JK.versi = \"}" <<<"$worker" \
+          grep -qF "var VERSION = \"${label#JK.version = \"}" <<<"$worker" \
             || { echo "::error::the live service worker is not this release"; exit 1; }
           echo "live: $label"
 
