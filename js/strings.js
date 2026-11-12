@@ -178,7 +178,7 @@ JK.places = [
     place: 'Gunung Kerinci',
     title: 'Mendaki Gunung',
     how: 'Sentuh layar berkali-kali untuk melangkah sampai ke puncak!',
-    fact: 'Gunung Kerinci adalah gunung berapi tertinggi di Indonesia, dan masih aktif. Tingginya 3.805 meter di atas permukaan laut. Kerinci juga gunung tertinggi di Pulau Sumatra.',
+    fact: 'Gunung Kerinci adalah gunung berapi tertinggi di Indonesia. Tingginya 3.805 meter di atas permukaan laut.',
     word: { kerinci: 'Kincai', meaning: 'Kerinci' }
   }
 ];
