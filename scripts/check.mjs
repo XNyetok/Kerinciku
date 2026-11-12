@@ -79,7 +79,7 @@ try {
     check(typeof text.result[l.id] === 'function', `place ${l.id} has no result text in JK.text.result`);
     check(new RegExp(`\\b${l.icon}:`).test(read('js/art.js')), `place ${l.id}: icon "${l.icon}" is not drawn in js/art.js`);
   }
-  check(places.filter((l) => l.final).length === 1, 'exactly one place must be the final one');
+  check(places.some((l) => !l.soon), 'at least one place must be open');
 } catch (e) {
   errors.push(`js/strings.js: ${e.message}`);
 }

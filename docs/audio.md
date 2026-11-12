@@ -1,6 +1,6 @@
 # Sounds
 
-Everything the game plays is a file in `audio/`: 14 effects, 2 music loops and 29
+Everything the game plays is a file in `audio/`: 14 effects, 2 music loops and 28
 narration clips, about 1.2 MB together. `js/audio.js` plays them through Web Audio.
 
 ```
@@ -8,7 +8,7 @@ audio/sfx/<name>.mp3      effects: tap, pick, oops, right, star, cheer, splash, 
                           step, flip, and the four instruments of the rhythm game
 audio/music/<name>.mp3    map (title, map, introductions, results) and play (inside a game)
 audio/voice/<name>.mp3    narration: intro-<place>, fact-<place>, animal-<animal>,
-                          goods-<good>, praise-1..3, map-ask, map-open, map-done
+                          goods-<good>, praise-1..3, map-ask, map-done
 ```
 
 ## Where they come from

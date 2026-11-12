@@ -114,7 +114,7 @@ test('rhythm: repeating the pattern wins, one slip is forgiven', async ({ page }
   expect(await savedStamps(page)).toEqual({ rhythm: 3 });
 });
 
-test('memory cards: pairs stay open, and the fifth stamp opens the mountain', async ({ page }) => {
+test('memory cards: pairs stay open, and the fifth stamp completes the book', async ({ page }) => {
   await withStamps(page, { tea: 1, lake: 1, forest: 1, rhythm: 1 });
   await openMap(page);
   await expect(page.locator('.pin[data-id="mountain"]')).toHaveClass(/pin-locked/);
@@ -143,7 +143,8 @@ test('memory cards: pairs stay open, and the fifth stamp opens the mountain', as
   const r = await waitForResult(page);
   expect(r.number).toBe(7);
   expect(r.stars).toBe(3);
-  await expect(page.locator('.result-note')).toContainText('terbuka');
+  await expect(page.locator('.result-note')).toContainText('tempat baru');
   await tap(page, '#to-map');
-  await expect(page.locator('.pin[data-id="mountain"]')).not.toHaveClass(/pin-locked/);
+  await expect(page.locator('#book')).toContainText('5/5');
+  await expect(page.locator('.pin[data-id="mountain"]')).toHaveClass(/pin-locked/);
 });

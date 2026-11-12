@@ -26,7 +26,7 @@ sounds about 1.2 MB more, and after one visit it plays without a connection.
 | Rentak Kudo | Ikuti Irama (rhythm) | Watch and hear a pattern of instruments, then repeat it (4 rounds). |
 | Sungai Penuh | Cari Pasangan (memory cards) | Find the six pairs of Kerinci's produce. |
 | Danau Kerinci | Tangkap Ikan (fishing) | Slide the boat to catch fish, steer clear of the water hyacinth (40 seconds). |
-| Gunung Kerinci | Mendaki Gunung (the climb) | Opens once the other five stamps are collected. Tap to walk up to the summit. |
+| Gunung Kerinci | Mendaki Gunung (the climb) | Not open yet: the summit stays locked on the map while more places are added. |
 
 No game can be lost. Each one always gives a stamp with one to three stars, and a child
 may replay it for more stars.
