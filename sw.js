@@ -63,7 +63,10 @@ function fromCache(req) {
 
 self.addEventListener('fetch', function (e) {
   var req = e.request;
-  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
+  var url = new URL(req.url);
+  if (req.method !== 'GET' || url.origin !== self.location.origin) return;
+  // The statistics panel and its numbers are not part of the game: never cached, never served from here.
+  if (/^\/(?:api|panel)(?:\/|$)/.test(url.pathname)) return;
 
   if (RELEASE) {
     e.respondWith(fromCache(req).then(function (hit) {

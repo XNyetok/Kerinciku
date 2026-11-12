@@ -196,6 +196,45 @@ test('every stamp completes the book while the mountain stays closed, and its ga
   await expect(page.locator('.result-stars .star.got')).toHaveCount(3);
 });
 
+test('the game reports how each game ends, for the anonymous counts', async ({ page }) => {
+  await openMap(page);
+  // Counting is off outside the live site: listen in on what would be sent.
+  await page.evaluate(() => {
+    window.sentCounts = [];
+    JK.telemetry.track = (type, data) => window.sentCounts.push({ type, ...data, seconds: undefined });
+  });
+  const counts = () => page.evaluate(() => JSON.parse(JSON.stringify(window.sentCounts)));
+
+  await openGame(page, 'tea');
+  await tap(page, '#quit');
+  await tap(page, '.overlay [data-answer="yes"]');
+  await expect(page.locator('.map')).toBeVisible();
+  expect(await counts()).toEqual([
+    { type: 'game_started', place: 'tea' },
+    { type: 'game_ended', place: 'tea', ending: 'quit', sound: true },
+  ]);
+
+  await page.evaluate(() => { window.sentCounts.length = 0; JK.debug.play('mountain'); });
+  await expect(page.locator('#countdown')).toHaveCount(0);
+  for (let i = 0; i < 36; i++) {
+    await tap(page, '#stage');
+    await page.waitForTimeout(30);
+  }
+  await expect(page.locator('.result')).toBeVisible({ timeout: 10_000 });
+  expect(await counts()).toEqual([
+    { type: 'game_started', place: 'mountain' },
+    { type: 'game_ended', place: 'mountain', ending: 'finished', sound: true, stars: 3, first: true },
+  ]);
+
+  // Closing the page in the middle of a game is counted as leaving it.
+  await page.evaluate(() => { window.sentCounts.length = 0; JK.debug.play('tea'); });
+  await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
+  expect(await counts()).toEqual([
+    { type: 'game_started', place: 'tea' },
+    { type: 'game_ended', place: 'tea', ending: 'left', sound: true },
+  ]);
+});
+
 const sound = (page) => page.evaluate(() => window.JK.audio.status());
 const quitGame = async (page) => {
   await tap(page, '#quit');

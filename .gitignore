@@ -68,6 +68,10 @@ desktop.ini
 # Tooling caches
 .gitleaks-cache/
 
+# The collector's local database and GeoIP file (docs/telemetry.md)
+/data/
+*.mmdb
+
 # Playwright
 /test-results/
 /playwright-report/
