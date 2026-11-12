@@ -1,0 +1,41 @@
+[Unit]
+Description=Jelajah Kerinci telemetry collector
+Documentation=https://github.com/XNyetok/Kerinciku/blob/main/docs/telemetry.md
+After=network.target
+# It stops by itself on every deploy and is started again: never give up on it.
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+# No account is created for it: systemd lends it a user for as long as it
+# runs, and owns its data directory, /var/lib/kerinciku-stats.
+DynamicUser=yes
+StateDirectory=kerinciku-stats
+# "current" is a symlink the deploy switches, like the site's. The collector
+# watches it (WATCH_RELEASE) and stops when it points elsewhere; Restart=always
+# then starts the new release. The deploy user needs no right over the service.
+WorkingDirectory=-/opt/kerinciku-stats/current
+Environment=PORT=8788
+Environment=HOST=127.0.0.1
+Environment=DB_PATH=/var/lib/kerinciku-stats/stats.db
+Environment=GEO_DB=/opt/kerinciku-stats/geo/city.mmdb
+Environment=WATCH_RELEASE=1
+ExecStart=/usr/bin/node /opt/kerinciku-stats/current/index.mjs
+Restart=always
+RestartSec=2
+
+# The service only needs to read its code and write its database.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target

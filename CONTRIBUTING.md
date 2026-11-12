@@ -52,7 +52,8 @@ history. Deleting the file in a later commit is not enough: it stays in the publ
 Everything in the repository is in English: code, comments, tests, documentation. The one
 exception is what players read. The game's interface is in Indonesian and lives in
 `js/strings.js`, plus the few static lines in `index.html` and `manifest.webmanifest`;
-`npm run check` refuses interface text written anywhere else.
+`npm run check` refuses interface text written anywhere else. The statistics panel
+(`server/panel/`) is in Indonesian too: it is read by the people who make the game.
 
 ## Commits
 

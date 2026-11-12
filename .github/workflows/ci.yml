@@ -73,8 +73,8 @@ jobs:
       - name: Check the nginx config
         run: |
           set -euo pipefail
-          # The file is an include, so wrap it the way the panel does: inside the
-          # site's server block.
+          # The files are includes, so wrap them the way the panel does: the rules
+          # inside the site's server block, the rate limit zones at http level.
           mkdir -p "$RUNNER_TEMP/nginx"
           cat > "$RUNNER_TEMP/nginx/nginx.conf" <<'EOF'
           events {}
@@ -84,6 +84,7 @@ jobs:
               server_name kerinciku.web.id www.kerinciku.web.id;
               include /repo/deploy/nginx/kerinciku-rewrite.conf;
             }
+            include /repo/deploy/nginx/kerinciku-limits.conf;
           }
           EOF
           docker run --rm --network none \
@@ -115,7 +116,7 @@ jobs:
       - name: Check the page, the places and the policy
         run: npm run check
 
-      - name: Test the game clock, the build and the deploy script
+      - name: Test the game clock, the build, the collector and the deploy script
         run: npm test
 
       - name: Name the build
@@ -144,6 +145,14 @@ jobs:
         with:
           name: site
           path: dist/
+          retention-days: 7
+          if-no-files-found: error
+
+      # The telemetry collector is published as it is in the repository.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: collector
+          path: server/
           retention-days: 7
           if-no-files-found: error
 

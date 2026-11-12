@@ -1,13 +1,14 @@
 /* The main flow: title -> map -> introduction -> game -> result, plus the stamp book. */
 (function () {
   'use strict';
-  var JK = window.JK, T = JK.text, S = JK.art, A = JK.audio, D = JK.store;
+  var JK = window.JK, T = JK.text, S = JK.art, A = JK.audio, D = JK.store, M = JK.telemetry;
   var app = document.getElementById('app');
   var clock = null;       // the clock of the game that is running
   var screenNo = 0;       // goes up on every screen change, to drop delays left behind
   var screenName = '';
   var newVersion = false;
   var said = {};          // the map lines Belang has already said aloud since the page opened
+  var running = null;     // the game being played, for the counts: { id, since }
   var OPEN = JK.places.filter(function (l) { return !l.soon; });
 
   function $(s) { return app.querySelector(s); }
@@ -17,7 +18,18 @@
   function has(l) { return starsAt(l) > 0; }
   function stampCount() { return OPEN.filter(has).length; }
 
+  /* Count the end of the game that is running, if one is: finished, quit, or left (the page went away). */
+  function ended(ending, more) {
+    if (!running) return;
+    var data = { place: running.id, ending: ending, seconds: Math.round((Date.now() - running.since) / 1000), sound: D.data.sound }, k;
+    for (k in more) data[k] = more[k];
+    running = null;
+    M.track('game_ended', data);
+  }
+
   function show(className, html) {
+    // Any other screen opening over a running game means the player walked out of it.
+    ended('quit');
     if (clock) { clock.stop(); clock = null; }
     A.hush();
     screenNo++;
@@ -237,6 +249,9 @@
       '<div class="stage" id="stage"></div>' +
       '<div class="countdown" id="countdown"><span>' + T.ready + '</span></div>');
 
+    running = { id: id, since: Date.now() };
+    M.track('game_started', { place: id });
+
     var c = clock = new JK.Clock();
     var bar = $('#bar'), score = $('#score'), countdown = $('#countdown'), finished = false, started = false;
 
@@ -251,6 +266,7 @@
       finish: function (outcome) {
         if (finished) return;
         finished = true;
+        ended('finished', { stars: outcome.stars, first: !starsAt(l) });
         c.stop();
         later(function () { result(id, outcome); }, 500);
       }
@@ -372,6 +388,9 @@
 
   D.read();
   A.setEnabled(D.data.sound);
+  M.visit({ stamps: stampCount(), sound: D.data.sound });
+  // Closing the page in the middle of a game is how many games end.
+  window.addEventListener('pagehide', function () { ended('left'); });
   // Browsers allow sound only after a first touch.
   document.addEventListener('pointerdown', function () { A.unlock(); }, { passive: true });
   document.addEventListener('keydown', function () { A.unlock(); });

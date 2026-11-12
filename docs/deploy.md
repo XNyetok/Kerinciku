@@ -1,25 +1,27 @@
 # Deploy
 
-The game is a static site. Merging to `main` only runs the checks; players get a change
-when a maintainer pushes a version tag and publishes the draft release it creates.
-Publishing copies that release to the VPS over SSH, into a fresh release folder, and
-switches `current` to it. The VPS runs nginx through aaPanel; the panel owns the vhost and
-the certificate.
+The game is a static site, plus a small collector for its anonymous counts
+(`docs/telemetry.md`). Merging to `main` only runs the checks; players get a change when a
+maintainer pushes a version tag and publishes the draft release it creates. Publishing
+copies that release to the VPS over SSH, into fresh release folders, and switches `current`
+to them. The VPS runs nginx through aaPanel; the panel owns the vhost and the certificate.
 
 ```
 PR, merge to main ─► CI: secret scan, tracked files and personal data, static
                      checks, unit tests, build, browser tests        (no deploy)
 
 git tag vX.Y.Z, push ─► Release: the same checks on the tag, then a DRAFT GitHub
-                        Release with the site and SHA256SUMS
+                        Release with the site, the collector and SHA256SUMS
                      │
                      ▼  a maintainer reviews the notes and publishes
-                  Deploy: download the release file, check its sum
+                  Deploy: download the release files, check their sums
                      │
                      ▼  rsync over SSH (an unprivileged deploy user)
-VPS  /www/wwwroot/kerinciku.web.id/releases/20261112000000-a1b2c3d/
+VPS  /www/wwwroot/kerinciku.web.id/releases/20261112000000-a1b2c3d/   the site
+     /opt/kerinciku-stats/releases/20261112000000-a1b2c3d/           the collector
                      │
-                     ▼  deploy/remote.sh: check the upload, switch current
+                     ▼  deploy/remote.sh: check the uploads, switch the collector and
+                        wait for it to answer as the new release, then switch the site
      current ─► the new release, previous ─► the one before
 ```
 
@@ -30,11 +32,24 @@ VPS  /www/wwwroot/kerinciku.web.id/releases/20261112000000-a1b2c3d/
     20261112000000-a1b2c3d/    one folder per deploy (UTC time, commit), newest five kept
   current -> releases/...      what is live, switched atomically on deploy
   previous -> releases/...     what a rollback goes back to
+
+/opt/kerinciku-stats/          the collector, same layout
+  releases/, current, previous
+  geo/city.mmdb                the GeoIP file (docs/telemetry.md), not part of a release
+/var/lib/kerinciku-stats/      its SQLite database, owned by the service
 ```
 
-One file on the server comes from this repository but is installed by hand:
-`deploy/nginx/kerinciku-rewrite.conf`, as the site's rewrite rules. A release never
-touches the server's nginx config (see *Changing the server config*).
+The collector runs as the systemd service `kerinciku-stats`, from `current`, on
+`127.0.0.1:8788`. The deploy user cannot restart a service and does not need to: the
+collector notices that `current` points at another release and stops, and systemd starts
+the new one. The deploy waits for the health answer to name the new release before it
+moves the site, and puts the old collector back if that never happens.
+
+Three files on the server come from this repository but are installed by hand: the
+site's rewrite rules (`deploy/nginx/kerinciku-rewrite.conf`), the rate limit zones
+(`deploy/nginx/kerinciku-limits.conf`) and the service
+(`deploy/systemd/kerinciku-stats.service`). A release never touches the server's nginx or
+systemd config (see *Changing the server config*).
 
 ## One-time setup
 
@@ -57,9 +72,25 @@ touches the server's nginx config (see *Changing the server config*).
 6. **SSH key for CI** — a keypair used for nothing else. The public half goes into the
    deploy user's `authorized_keys`; the private half is stored as the repository secret
    `DEPLOY_SSH_KEY`. Never commit it.
-7. **Server config** — install the nginx file by hand (see *Changing the server config*).
-   Without it the site does not show at all: nginx keeps looking for files in the site
+7. **Server config** — install the nginx files by hand (see *Changing the server config*).
+   Without them the site does not show at all: nginx keeps looking for files in the site
    root, not in `current`.
+8. **Collector** — Node 22.13 or newer at `/usr/bin/node`, then, from the admin account:
+
+   ```sh
+   sudo mkdir -p /opt/kerinciku-stats/releases /opt/kerinciku-stats/geo
+   sudo chown -R <deploy-user>: /opt/kerinciku-stats
+   sudo install -m 644 /tmp/kerinciku-stats.service /etc/systemd/system/kerinciku-stats.service
+   sudo systemctl daemon-reload && sudo systemctl enable --now kerinciku-stats
+   ```
+
+   The service keeps restarting quietly until the first deploy gives it a `current`. It
+   needs no account of its own (`DynamicUser`), and its database appears in
+   `/var/lib/kerinciku-stats` on the first start. Fetch the GeoIP file as
+   `docs/telemetry.md` describes.
+9. **Panel password** — `sudo htpasswd -c /www/server/nginx/conf/.htpasswd-kerinciku <name>`
+   (or `openssl passwd -apr1`), readable by nginx only. The password is never written
+   into this repository.
 
 ## Repository secrets and variables
 
@@ -131,23 +162,27 @@ and into `sw.js`:
 
 `.github/workflows/deploy.yml`, given a published release:
 
-1. Download the release's site file, check it against `SHA256SUMS`, and make sure it was
-   built for that tag. A draft, or a release without the file, stops here.
+1. Download the release's site and collector files, check them against `SHA256SUMS`, and
+   make sure the site was built for that tag. A draft, or a release without the files,
+   stops here. (Releases up to 0.2.1 have no collector file and cannot be deployed again.)
 2. Check the deploy settings, then `rsync` the site into `releases/<release>/` under the
-   site root. The folder is new on every deploy (`<UTC time>-<sha7>`), so nothing live
-   changes during the upload.
-3. Run `deploy/remote.sh activate` over SSH: check that the upload is complete, switch
-   `current` with `mv -Tf` so no request sees a half switch, record the old target as
-   `previous`, and keep the five newest releases plus whatever `current` and `previous`
+   site root and the collector into `releases/<release>/` under `/opt/kerinciku-stats`. The
+   folders are new on every deploy (`<UTC time>-<sha7>`), so nothing live changes during
+   the upload.
+3. Run `deploy/remote.sh activate` over SSH: check that both uploads are complete; switch
+   the collector's `current` and wait until its health answer names this release (if it
+   never does, the old collector is put back and the site is not touched); switch the
+   site's `current` with `mv -Tf` so no request sees a half switch; record the old targets
+   as `previous`; and keep the five newest releases plus whatever `current` and `previous`
    point at.
 4. Smoke test: the page, `sw.js`, a script, the stylesheet, the manifest and an icon answer
-   200; the live `js/version.js` and `sw.js` carry this release's label; and the server
-   sends a Content-Security-Policy. If the smoke test fails, the job runs
-   `deploy/remote.sh rollback` and fails.
+   200; the live `js/version.js` and `sw.js` carry this release's label; the server sends a
+   Content-Security-Policy; the beacon answers; and the panel's numbers ask for a password.
+   If the smoke test fails, the job runs `deploy/remote.sh rollback` and fails.
 
 ## Changing the server config
 
-Edit the file in `deploy/`, merge it (CI runs `nginx -t` on the repository's nginx file),
+Edit the file in `deploy/`, merge it (CI runs `nginx -t` on the repository's nginx files),
 then install it from the admin account on the VPS. Other sites share this nginx: keep a
 dated copy, and always run `nginx -t` before reloading.
 
@@ -155,8 +190,13 @@ dated copy, and always run `nginx -t` before reloading.
 F=/www/server/panel/vhost/rewrite/kerinciku.web.id.conf
 sudo cp -p "$F" "$F.bak-$(date +%F-%H%M%S)"
 sudo install -m 644 /tmp/kerinciku-rewrite.conf "$F"     # copied over with scp
+# The rate limit zones the rules refer to; only when that file changed.
+sudo install -m 644 /tmp/kerinciku-limits.conf /www/server/panel/vhost/nginx/0.kerinciku-limits.conf
 sudo nginx -t && sudo nginx -s reload
 ```
+
+The service file goes to `/etc/systemd/system/kerinciku-stats.service`, followed by
+`sudo systemctl daemon-reload && sudo systemctl restart kerinciku-stats`.
 
 ## Rollback
 
@@ -164,11 +204,11 @@ On the server, as the deploy user, from a checkout of this repository or with th
 copied over:
 
 ```sh
-bash deploy/remote.sh rollback /www/wwwroot/kerinciku.web.id
+bash deploy/remote.sh rollback /www/wwwroot/kerinciku.web.id /opt/kerinciku-stats
 ```
 
-It swaps `current` and `previous`, so running it a second time undoes it. No rebuild, no
-downtime.
+It swaps `current` and `previous` for the site, and for the collector when it has a
+previous release, so running it a second time undoes it. No rebuild, no downtime.
 
 Through CI instead, deploy the previous release again:
 `gh workflow run deploy.yml --ref v<previous>`. Then fix the problem on `main` and release

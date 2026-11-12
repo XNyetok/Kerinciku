@@ -1,10 +1,11 @@
 // Static checks that need no browser: the files the page asks for exist, the
 // scripts parse, every place on the map has its game, the interface text
 // lives in one file, every sound exists and the narration says what the
-// screen shows, and nothing in the page would be blocked by the live site's
-// Content-Security-Policy.
+// screen shows, nothing in the page would be blocked by the live site's
+// Content-Security-Policy, and the collector and its panel parse.
 //
 //   node scripts/check.mjs
+import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -119,13 +120,26 @@ try {
 // 7. nginx sends the same policy the local server and the tests use.
 const nginx = readdirSync(join(root, 'deploy/nginx')).filter((f) => f.endsWith('.conf'));
 check(nginx.length > 0, 'deploy/nginx has no config');
+let policyCount = 0;
 for (const f of nginx) {
   const policies = [...read(`deploy/nginx/${f}`).matchAll(/add_header Content-Security-Policy "([^"]+)"/g)].map((m) => m[1]);
-  check(policies.length > 0, `deploy/nginx/${f} sends no Content-Security-Policy`);
+  policyCount += policies.length;
   for (const p of policies) {
     check(p.replace(/; upgrade-insecure-requests$/, '') === CSP, `deploy/nginx/${f}: the CSP differs from scripts/site.mjs`);
   }
 }
+check(policyCount > 0, 'deploy/nginx sends no Content-Security-Policy');
+
+// 8. The collector and its panel parse, and the panel keeps to the collector's
+//    policy: no inline script, style or handler.
+for (const f of readdirSync(join(root, 'server'), { recursive: true }).filter((n) => /\.m?js$/.test(n))) {
+  const file = `server/${f.split(sep).join('/')}`;
+  const parsed = spawnSync(process.execPath, ['--check', join(root, file)], { encoding: 'utf8' });
+  check(parsed.status === 0, `${file} does not parse: ${(parsed.stderr || '').split('\n').slice(0, 5).join(' ').trim()}`);
+}
+const panel = read('server/panel/index.html');
+check(!/<script(?![^>]*\bsrc=)[^>]*>/i.test(panel), 'server/panel/index.html has an inline <script>');
+check(!/<style[\s>]|\sstyle\s*=|\son[a-z]+\s*=/i.test(panel), 'server/panel/index.html has an inline style or event handler');
 
 if (errors.length) {
   console.error(errors.map((e) => `check: ${e}`).join('\n'));

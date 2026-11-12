@@ -47,7 +47,7 @@ npm run serve        # http://127.0.0.1:8765
 
 ```sh
 npm run check        # files, places on the map and the security policy agree
-npm test             # the game clock, saved progress, the build, the deploy script, the privacy check
+npm test             # the game clock, saved progress, the build, the collector, the deploy script, the privacy check
 npm run test:e2e     # plays all six games in a browser (phone and desktop)
 npm run build        # copies the site into dist/ and checks its size
 ```
@@ -87,15 +87,18 @@ js/main.js              the screens: title, map, introduction, game, result, sta
 js/game/*.js            one file per mini-game
 js/boot.js              the reload prompt when a file fails to load
 js/version.js           the version number, stamped by the build
+js/telemetry.js         anonymous counts of visits and games (docs/telemetry.md)
 sw.js                   offline play
 manifest.webmanifest    what "Add to home screen" uses
 icons/                  app icons
 audio/                  recorded effects, music and narration (docs/audio.md)
 
+server/                 the collector of those counts and its panel (Node, SQLite)
 scripts/                build, local server, checks
 tests/                  unit tests and browser tests
-deploy/                 server script and nginx config
+deploy/                 server script, nginx config, the collector's service
 docs/deploy.md          how a release reaches the server
+docs/telemetry.md       what is counted, what never is, and the panel
 docs/audio.md           where the sounds come from and how to replace one
 ```
 
@@ -129,7 +132,10 @@ The live site allows no inline script or style (Content-Security-Policy): do not
 ## Notes
 
 - Stamps and the sound setting are kept on the player's own device (`localStorage`). The
-  stamp book has a "start over" button. The game sends nothing to a server.
+  stamp book has a "start over" button.
+- The game counts visits and games anonymously, to see which game needs work: no cookie,
+  no identifier, no stored address, and nothing at all when the browser sends Do Not Track
+  (`docs/telemetry.md`).
 - Narration is recorded. When a clip cannot be loaded, the device's own voice reads the
   text instead, and only when the device has an Indonesian voice.
 - When a file fails to load (a weak signal, for example), a message with a reload button

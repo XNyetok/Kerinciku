@@ -22,9 +22,16 @@ a public repository, and every issue is indexable.
 
 ## Data collected by the game
 
-None. The game sends nothing to a server beyond requesting its own files: no analytics,
-no cookies, no accounts, no advertising, no third-party libraries. Stamps and the sound
-setting are kept on the player's device (`localStorage`) and never leave it.
+Anonymous counts only: a visit, a game started, a game ended, a JavaScript error, sent to
+the game's own server and to nobody else. They carry no identifier, so they cannot be tied
+to a player or to each other. The IP address is used once, to estimate a province and a
+town, and is neither stored nor logged; the browser's User-Agent is reduced to a browser
+name, a system and a kind of device. A browser that sends Do Not Track is not counted.
+`docs/telemetry.md` lists every field.
+
+Beyond that the game requests its own files and nothing else: no cookies, no accounts, no
+advertising, no third-party libraries or services. Stamps and the sound setting are kept on
+the player's device (`localStorage`) and never leave it.
 
 The players of this game are children. If you believe the running site behaves
 differently from this, that is a bug worth reporting.
