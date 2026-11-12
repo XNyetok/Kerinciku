@@ -182,6 +182,7 @@
     close: '<path d="M24 24l52 52M76 24L24 76" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round"/>',
     play: '<path d="M30 14l54 36-54 36z" fill="currentColor" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/>',
     redo: '<path d="M76 69A30 30 0 1 1 71 33" fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round"/><path d="M82 22L60 44l26 4z" fill="currentColor" stroke="currentColor" stroke-width="8" stroke-linejoin="round"/>',
+    info: '<circle cx="50" cy="50" r="38" fill="none" stroke="currentColor" stroke-width="10"/><circle cx="50" cy="31" r="7" fill="currentColor"/><path d="M50 48v24" fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round"/>',
     pin: '<path d="M50 92Q20 58 20 38a30 30 0 0 1 60 0Q80 58 50 92z" fill="currentColor"/><circle cx="50" cy="38" r="11" fill="#fff"/>'
   };
 

@@ -646,6 +646,9 @@ button { font: inherit; color: inherit; }
 }
 .dialog { width: 100%; max-width: 340px; background: #fff; border-radius: 26px; padding: 24px 18px 22px; text-align: center; animation: pop .25s ease-out; }
 .dialog p { font-size: 24px; font-weight: 900; }
+.dialog-note h2 { font-size: 22px; font-weight: 900; color: var(--leaf-dark); }
+.dialog-note p { margin-top: 12px; font-size: 16px; font-weight: 700; line-height: 1.4; color: var(--ink-soft); }
+.dialog-note a { color: var(--leaf-dark); text-decoration: underline; }
 .row { display: flex; gap: 12px; margin-top: 18px; }
 .row .btn { flex: 1; }
 

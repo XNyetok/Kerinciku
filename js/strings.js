@@ -26,6 +26,17 @@ JK.text = {
   stamps: 'Stempel',
   yes: 'Ya',
   no: 'Tidak',
+  close: 'Tutup',
+
+  // The note behind the "i" button on the title screen.
+  about: 'Tentang permainan ini',
+  aboutTitle: 'Masih terus dikembangkan',
+  aboutText: [
+    'Jelajah Kerinci masih terus dikembangkan. Mungkin masih ada kekurangan dan kesalahan, dan kami terus memperbaikinya.',
+    'Informasi tentang Kerinci di sini kami susun sebaik mungkin, tetapi bisa saja ada yang kurang tepat. Bahasa dan adat juga bisa berbeda di tiap dusun.'
+  ],
+  aboutReport: 'Menemukan yang keliru? Beri tahu kami',
+  aboutReportUrl: 'https://github.com/XNyetok/Kerinciku/issues',
 
   mapAsk: 'Aku Belang. Mau ke mana kita?',
   mapLocked: 'Puncak Gunung Kerinci belum dibuka. Tunggu ya!',
