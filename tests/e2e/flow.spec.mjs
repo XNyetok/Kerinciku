@@ -1,6 +1,6 @@
 import { exists, expect, SAVED_AS, openGame, openMap, savedStamps, tap, tapPin, test, withStamps } from './helpers.mjs';
 
-test('the title leads to a map with six places, the mountain locked', async ({ page }) => {
+test('the title leads to a map with six places, the mountain not open yet', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('h1')).toHaveText('JelajahKerinci');
   await expect(page.locator('.version')).toHaveText('v0.0.0-test');
@@ -10,7 +10,7 @@ test('the title leads to a map with six places, the mountain locked', async ({ p
   await expect(page.locator('.pin[data-id="mountain"]')).toHaveClass(/pin-locked/);
 
   await tapPin(page, 'mountain');
-  await expect(page.locator('#say')).toContainText('5 stempel');
+  await expect(page.locator('#say')).toContainText('belum dibuka');
   await expect(page.locator('.map')).toBeVisible();
 });
 
@@ -55,10 +55,10 @@ test('stamps and the sound setting survive a reload, and can be reset', async ({
   expect(await savedStamps(page), 'a worse run keeps the better stamp').toEqual({ tea: 2 });
 
   await tap(page, '#to-map');
-  await expect(page.locator('#book')).toContainText('1/6');
+  await expect(page.locator('#book')).toContainText('1/5');
   await tap(page, '#sound');
   await page.reload();
-  await expect(page.locator('#book')).toContainText('1/6');
+  await expect(page.locator('#book')).toContainText('1/5');
   await expect(page.locator('#sound')).toHaveAttribute('aria-pressed', 'false');
 
   await tap(page, '#book');
@@ -87,15 +87,14 @@ test('progress saved by version 0.1.0 is carried over', async ({ page }) => {
     [SAVED_AS, { stempel: { teh: 3, danau: 1, rimba: 2, rentak: 3, pasar: 2 }, suara: false }],
   );
   await openMap(page);
-  await expect(page.locator('#book')).toContainText('5/6');
+  await expect(page.locator('#book')).toContainText('5/5');
   await expect(page.locator('#sound')).toHaveAttribute('aria-pressed', 'false');
-  await expect(page.locator('.pin[data-id="mountain"]')).not.toHaveClass(/pin-locked/);
 
   // The first save rewrites it in the current format, with nothing lost.
   await tap(page, '#sound');
   expect(await savedStamps(page)).toEqual({ tea: 3, lake: 1, forest: 2, rhythm: 3, market: 2 });
   await page.reload();
-  await expect(page.locator('#book')).toContainText('5/6');
+  await expect(page.locator('#book')).toContainText('5/5');
 });
 
 test('place colours are applied without inline styles', async ({ page }) => {
@@ -165,13 +164,28 @@ test.describe('when a file does not arrive', () => {
   });
 });
 
-test('five stamps open the mountain, and the summit completes the book', async ({ page }) => {
-  await withStamps(page, { tea: 1, lake: 1, forest: 1, rhythm: 1, market: 1 });
+test('every stamp completes the book while the mountain stays closed, and its game still plays', async ({ page }) => {
+  // A stamp from the time the mountain was open is kept, but not shown.
+  await withStamps(page, { tea: 1, lake: 1, forest: 1, rhythm: 1, market: 1, mountain: 3 });
   await openMap(page);
-  await expect(page.locator('.pin[data-id="mountain"]')).not.toHaveClass(/pin-locked/);
-  await expect(page.locator('#say')).toContainText('mendaki');
+  await expect(page.locator('#book')).toContainText('5/5');
+  await expect(page.locator('#say')).toContainText('tempat baru');
+  await expect(page.locator('.pin[data-id="mountain"]')).toHaveClass(/pin-locked/);
+  expect(await exists(page, '.pin-pulse'), 'no place is left to visit').toBe(false);
 
-  await openGame(page, 'mountain');
+  await tapPin(page, 'mountain');
+  await expect(page.locator('#say')).toContainText('belum dibuka');
+  await tap(page, '#sound');
+  expect((await savedStamps(page)).mountain).toBe(3);
+
+  await tap(page, '#book');
+  await expect(page.locator('.stamp-tile.owned')).toHaveCount(5);
+  await tap(page, '.stamp-tile[data-id="mountain"]');
+  await expect(page.locator('#detail')).toContainText('belum dibuka');
+
+  // The climb is kept for the day the summit opens: it must still play to the end.
+  await page.evaluate(() => JK.debug.play('mountain'));
+  await expect(page.locator('#countdown')).toHaveCount(0);
   for (let i = 0; i < 36; i++) {
     await tap(page, '#stage');
     await page.waitForTimeout(30);
@@ -180,11 +194,6 @@ test('five stamps open the mountain, and the summit completes the book', async (
   await expect(page.locator('.mountain-post')).toContainText('Puncak Gunung Kerinci');
   await expect(page.locator('.result')).toBeVisible({ timeout: 10_000 });
   await expect(page.locator('.result-stars .star.got')).toHaveCount(3);
-  await expect(page.locator('.result-note')).toContainText('seluruh Kerinci');
-
-  await tap(page, '#to-map');
-  await expect(page.locator('#book')).toContainText('6/6');
-  expect(await exists(page, '.pin-pulse'), 'no place is left to visit').toBe(false);
 });
 
 const sound = (page) => page.evaluate(() => window.JK.audio.status());

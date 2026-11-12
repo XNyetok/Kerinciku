@@ -28,9 +28,8 @@ JK.text = {
   no: 'Tidak',
 
   mapAsk: 'Aku Belang. Mau ke mana kita?',
-  mapLocked: function (left) { return 'Kumpulkan ' + left + ' stempel lagi, lalu kita mendaki Gunung Kerinci!'; },
-  mapOpen: 'Semua stempel terkumpul. Ayo mendaki Gunung Kerinci!',
-  mapDone: 'Hebat! Kamu sudah menjelajahi seluruh Kerinci.',
+  mapLocked: 'Puncak Gunung Kerinci belum dibuka. Tunggu ya!',
+  mapDone: 'Hebat! Semua stempel sudah terkumpul. Tunggu tempat baru, ya!',
   mapLake: 'Danau Gunung Tujuh',
   locked: ' (terkunci)',
 
@@ -44,13 +43,13 @@ JK.text = {
   didYouKnow: 'Tahukah kamu?',
   kerinciWord: 'Kata Kerinci',
   means: 'artinya',
-  mountainOpen: 'Gunung Kerinci sekarang terbuka!',
-  allDone: 'Kamu sudah menjelajahi seluruh Kerinci!',
+  allDone: 'Semua tempat sudah kamu jelajahi. Tunggu tempat baru, ya!',
 
   bookTitle: 'Buku Stempel',
   bookAria: function (n, total) { return 'Buku Stempel, ' + n + ' dari ' + total + ' stempel'; },
   bookPick: 'Sentuh stempel untuk membaca ceritanya.',
   bookEmpty: 'Mainkan dulu tempat ini untuk mendapat stempelnya.',
+  bookSoon: 'Tempat ini belum dibuka. Tunggu ya!',
   stampAria: function (place, stars) { return place + (stars ? ', ' + stars + ' bintang' : ', belum ada stempel'); },
   reset: 'Mulai dari awal',
   resetAsk: 'Hapus semua stempel dan mulai dari awal?',
@@ -112,7 +111,8 @@ JK.text = {
 /*
  * The places on the map.
  *   x, y   where the pin sits (the map is 360 x 500)
- *   final  the last place: it opens once every other stamp is collected
+ *   soon   a place that is not open yet: its pin is locked and it gives no stamp.
+ *          New places are added to this list; the summit waits until last.
  *   word   one word in the Kerinci language, introduced at that place
  */
 JK.places = [
@@ -162,7 +162,7 @@ JK.places = [
     word: { kerinci: 'aye', meaning: 'air' }
   },
   {
-    id: 'mountain', icon: 'mountain', color: '#5f7d8c', x: 118, y: 80, final: true,
+    id: 'mountain', icon: 'mountain', color: '#5f7d8c', x: 118, y: 80, soon: true,
     short: 'G. Kerinci',
     place: 'Gunung Kerinci',
     title: 'Mendaki Gunung',
@@ -190,7 +190,6 @@ JK.voice = (function () {
   Object.keys(T.goods).forEach(function (k) { v['goods-' + k] = T.goods[k]; });
   [1, 2, 3].forEach(function (n) { v['praise-' + n] = T.praise[n]; });
   v['map-ask'] = T.mapAsk;
-  v['map-open'] = T.mapOpen;
   v['map-done'] = T.mapDone;
   return v;
 })();

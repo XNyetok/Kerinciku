@@ -8,14 +8,14 @@
   var screenName = '';
   var newVersion = false;
   var said = {};          // the map lines Belang has already said aloud since the page opened
-  var MAIN = JK.places.filter(function (l) { return !l.final; });
+  var OPEN = JK.places.filter(function (l) { return !l.soon; });
 
   function $(s) { return app.querySelector(s); }
   function find(id) { return JK.places.filter(function (l) { return l.id === id; })[0]; }
-  function has(l) { return D.data.stamps[l.id] > 0; }
-  function stampCount() { return JK.places.filter(has).length; }
-  function mainCount() { return MAIN.filter(has).length; }
-  function locked(l) { return !!l.final && mainCount() < MAIN.length; }
+  // A place that is not open yet shows no stamp, even one saved while it was open.
+  function starsAt(l) { return l.soon ? 0 : D.data.stamps[l.id] || 0; }
+  function has(l) { return starsAt(l) > 0; }
+  function stampCount() { return OPEN.filter(has).length; }
 
   function show(className, html) {
     if (clock) { clock.stop(); clock = null; }
@@ -158,10 +158,10 @@
   function map() {
     var status = {};
     JK.places.forEach(function (l) {
-      status[l.id] = { stars: D.data.stamps[l.id] || 0, locked: locked(l) };
+      status[l.id] = { stars: starsAt(l), locked: !!l.soon };
     });
-    var n = stampCount(), total = JK.places.length;
-    var line = n === total ? 'map-done' : mainCount() === MAIN.length ? 'map-open' : 'map-ask';
+    var n = stampCount(), total = OPEN.length;
+    var line = n === total ? 'map-done' : 'map-ask';
     var say = JK.voice[line];
 
     show('map',
@@ -181,9 +181,9 @@
 
     function choose(id) {
       var l = find(id);
-      if (locked(l)) {
+      if (l.soon) {
         A.fx.oops();
-        $('#say').textContent = T.mapLocked(MAIN.length - mainCount());
+        $('#say').textContent = T.mapLocked;
         JK.replay($('.bubble'), 'shake');
         return;
       }
@@ -283,13 +283,13 @@
   /* ---------- Result ---------- */
 
   function result(id, outcome) {
-    var l = find(id), before = D.data.stamps[id] || 0;
-    var wasOpen = mainCount() === MAIN.length;
-    if (outcome.stars > before) {
+    var l = find(id), before = starsAt(l);
+    var wasDone = stampCount() === OPEN.length;
+    if (!l.soon && outcome.stars > before) {
       D.data.stamps[id] = outcome.stars;
       D.write();
     }
-    var note = l.final ? T.allDone : (!wasOpen && mainCount() === MAIN.length ? T.mountainOpen : '');
+    var note = !wasDone && stampCount() === OPEN.length ? T.allDone : '';
 
     var el = show('result',
       '<div class="result-body">' +
@@ -310,7 +310,7 @@
     for (var i = 0; i < outcome.stars; i++) (function (k) { later(function () { A.fx.star(k); }, 250 + k * 350); })(i);
     var afterStars = 250 + outcome.stars * 350 + 150;
     later(function () { A.speak('praise-' + outcome.stars); }, afterStars);
-    if (!before || l.final) {
+    if (!before) {
       later(A.fx.cheer, afterStars + 800);
       confetti(el);
     }
@@ -335,7 +335,7 @@
     show('book',
       '<header class="bar">' + roundButton('back', 'back', T.toMap) + '<h2>' + T.bookTitle + '</h2>' + soundButton() + '</header>' +
       '<div class="book-body"><div class="book-grid">' + JK.places.map(function (l) {
-        var n = D.data.stamps[l.id] || 0;
+        var n = starsAt(l);
         return '<button type="button" class="stamp-tile' + (n ? ' owned' : '') + '" data-id="' + l.id +
           '" aria-label="' + T.stampAria(l.place, n) + '">' +
           '<span class="stamp">' + S.icon(n ? l.icon : 'question') + '</span><span class="stamp-name">' + l.short + '</span>' +
@@ -359,7 +359,7 @@
         A.fx.tap();
         [].forEach.call(app.querySelectorAll('.stamp-tile'), function (x) { x.classList.toggle('picked', x === b); });
         if (!has(l)) {
-          detail.innerHTML = '<h3>' + l.place + '</h3><p>' + T.bookEmpty + '</p>';
+          detail.innerHTML = '<h3>' + l.place + '</h3><p>' + (l.soon ? T.bookSoon : T.bookEmpty) + '</p>';
           return;
         }
         detail.innerHTML = factCard(l);
