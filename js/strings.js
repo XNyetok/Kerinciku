@@ -3,15 +3,15 @@
  * can be reviewed and changed in one place. Nothing else in js/ contains
  * interface text.
  *
- * Words in the Kerinci language marked CHECK have not been confirmed by a
- * native speaker. Dialects differ from village to village, so replace them
- * with the form used where the children who play this live.
+ * The words in the Kerinci language have been confirmed by a native speaker.
+ * Dialects differ from village to village: mark a new word CHECK until a
+ * native speaker has confirmed it.
  */
 window.JK = window.JK || {};
 
 JK.text = {
   title: ['Jelajah', 'Kerinci'],
-  greeting: 'Apo kabar, uhang Kincai?', // CHECK: "How are you, people of Kerinci?"
+  greeting: 'Apo kabar, uhang Kincai?', // "How are you, people of Kerinci?"
   invite: 'Ayo keliling Bumi Sakti Alam Kerinci!',
 
   play: 'Main',
@@ -121,7 +121,7 @@ JK.places = [
     title: 'Petik Teh',
     how: 'Sentuh pucuk teh yang muncul. Jangan sentuh ulat ya!',
     fact: 'Kebun teh Kayu Aro terletak di kaki Gunung Kerinci. Kebun ini luas sekali dan sudah ada sejak sekitar 100 tahun lalu.',
-    word: { kerinci: 'aro', meaning: 'pohon ara, sejenis beringin' } // CHECK
+    word: { kerinci: 'aro', meaning: 'pohon ara, sejenis beringin' }
   },
   {
     id: 'forest', icon: 'hornbill', color: '#1d7a4a', x: 54, y: 236,
@@ -130,7 +130,7 @@ JK.places = [
     title: 'Potret Satwa',
     how: 'Satwa mengintip dari balik semak. Sentuh untuk memotretnya!',
     fact: 'Taman Nasional Kerinci Seblat adalah taman nasional terluas di Sumatra. Harimau sumatera tinggal di sini. Yuk, kita jaga hutannya!',
-    word: { kerinci: 'imbo', meaning: 'hutan' } // CHECK
+    word: { kerinci: 'imbo', meaning: 'hutan' }
   },
   {
     id: 'rhythm', icon: 'drum', color: '#d9582b', x: 256, y: 264,
@@ -148,7 +148,7 @@ JK.places = [
     title: 'Cari Pasangan',
     how: 'Buka dua kartu. Cari gambar yang sama!',
     fact: 'Kerinci adalah penghasil kayu manis terbesar di Indonesia. Kulit pohonnya dikeringkan menjadi bumbu yang harum.',
-    word: { kerinci: 'kulit manih', meaning: 'kayu manis' } // CHECK
+    word: { kerinci: 'kulit manaih', meaning: 'kayu manis' }
   },
   {
     id: 'lake', icon: 'fish', color: '#2f7fd1', x: 240, y: 432,
@@ -157,7 +157,7 @@ JK.places = [
     title: 'Tangkap Ikan',
     how: 'Geser perahu ke kiri dan ke kanan untuk menangkap ikan. Hindari eceng gondok!',
     fact: 'Danau Kerinci adalah danau terbesar di Kerinci. Di perairan Kerinci hidup ikan semah, ikan yang terkenal dari daerah ini.',
-    word: { kerinci: 'ayik', meaning: 'air' } // CHECK
+    word: { kerinci: 'aye', meaning: 'air' }
   },
   {
     id: 'mountain', icon: 'mountain', color: '#5f7d8c', x: 118, y: 80, final: true,
