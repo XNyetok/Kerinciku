@@ -15,7 +15,7 @@ Every stamp opens one short fact and one word in the Kerinci language.
 
 The game is in Indonesian, with words in the Kerinci language. It is designed for Android
 phones held upright, and also runs on a laptop. The game itself is about 150 KB, its
-sounds about 1 MB more, and after one visit it plays without a connection.
+sounds about 1.2 MB more, and after one visit it plays without a connection.
 
 ## What is in it
 

@@ -1,7 +1,7 @@
 # Sounds
 
 Everything the game plays is a file in `audio/`: 14 effects, 2 music loops and 29
-narration clips, about 1 MB together. `js/audio.js` plays them through Web Audio.
+narration clips, about 1.2 MB together. `js/audio.js` plays them through Web Audio.
 
 ```
 audio/sfx/<name>.mp3      effects: tap, pick, oops, right, star, cheer, splash, shutter,
@@ -15,8 +15,8 @@ audio/voice/<name>.mp3    narration: intro-<place>, fact-<place>, animal-<animal
 
 The sounds are synthetic, made with [ElevenLabs](https://elevenlabs.io) on the
 maintainer's paid plan: the effects with its sound effects model, the music with its music
-model (instrumental), and the narration with its text-to-speech model and the stock
-Indonesian voice "Zulfa". Nothing was recorded from a person, an instrument or an existing
+model (instrumental), and the narration with its text-to-speech model and the Indonesian
+library voice "Serena". Nothing was recorded from a person, an instrument or an existing
 piece of music.
 
 What each one was made from:
@@ -56,7 +56,7 @@ Each file is mono mp3 with no metadata, cut and levelled before it is encoded:
 - **Effects**: the silence before and after is cut, the end is faded, the peak is set
   just under full scale. 44.1 kHz, 80 kbit/s.
 - **Narration**: the silence before and after is cut, and every clip is brought to the
-  same loudness. 24 kHz, 32 kbit/s.
+  same loudness. 32 kHz, 48 kbit/s: at 32 kbit/s the voice was audibly worse.
 - **Music**: a whole number of bars is cut out (12 bars of `map`, 16 of `play`), and its
   last half bar is cross-faded into the half bar that came before its start, so the end
   runs into the beginning. The file then repeats its first 0.6 seconds after the loop.
@@ -67,11 +67,15 @@ Each file is mono mp3 with no metadata, cut and levelled before it is encoded:
 The encoding step is the same for all three, with the rate and bit rate above:
 
 ```sh
-ffmpeg -i in.wav -ac 1 -ar 24000 -c:a libmp3lame -b:a 32k \
+ffmpeg -i in.wav -ac 1 -ar 32000 -c:a libmp3lame -b:a 48k \
   -map_metadata -1 -fflags +bitexact -flags:a +bitexact -id3v2_version 0 -write_id3v1 0 out.mp3
 ```
 
 ## Replacing or adding a sound
+
+- Listen before a voice is used for every clip. A first narrator was chosen from its
+  description alone and turned out to drone; make one clip, listen to it as it comes
+  and after encoding, and only then make the rest.
 
 - `npm run check` fails when a sound the game asks for is missing, when a file in
   `audio/` is not used, and when a narration line in `js/strings.js` no longer matches
@@ -82,7 +86,7 @@ ffmpeg -i in.wav -ac 1 -ar 24000 -c:a libmp3lame -b:a 32k \
   tone the browser synthesises while the file has not arrived.
 - A new music loop needs its length in `MUSIC`, and the repeated 0.6 seconds at its end.
 - The build keeps two budgets (`scripts/site.mjs`): 400 KB for everything a game needs
-  before it can be played, 1200 KB for `audio/`. The sounds are fetched after the page
+  before it can be played, 1400 KB for `audio/`. The sounds are fetched after the page
   has loaded and stored for offline play one by one, so a sound that fails to download
   never stops the game from installing.
 - A sound made by someone else needs a licence that allows it to be published here

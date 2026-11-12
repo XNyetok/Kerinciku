@@ -38,4 +38,4 @@ export const HEADERS = {
  * the second for the sounds in audio/, which arrive afterwards.
  */
 export const SIZE_BUDGET = 400 * 1024;
-export const AUDIO_BUDGET = 1200 * 1024;
+export const AUDIO_BUDGET = 1400 * 1024;
