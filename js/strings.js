@@ -36,7 +36,7 @@ JK.text = {
     'Informasi tentang Kerinci di sini kami susun sebaik mungkin, tetapi bisa saja ada yang kurang tepat. Bahasa dan adat juga bisa berbeda di tiap dusun.'
   ],
   aboutReport: 'Menemukan yang keliru? Beri tahu kami',
-  aboutReportUrl: 'https://github.com/XNyetok/Kerinciku/issues',
+  aboutReportUrl: 'mailto:debi@nyetok.id?subject=Jelajah%20Kerinci',
 
   mapAsk: 'Aku Belang. Mau ke mana kita?',
   mapLocked: 'Puncak Gunung Kerinci belum dibuka. Tunggu ya!',
