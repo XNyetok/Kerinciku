@@ -169,3 +169,26 @@ JK.places = [
     word: { kerinci: 'Kincai', meaning: 'Kerinci' }
   }
 ];
+
+/*
+ * What the recorded narration says, by clip (audio/voice/<name>.mp3). The same
+ * text is what the device's own voice reads when a clip cannot be loaded.
+ *
+ * A clip has to be recorded again when its text changes: `npm run check`
+ * compares these lines with scripts/voice.json, the text each clip was
+ * recorded from (docs/audio.md).
+ */
+JK.voice = (function () {
+  var T = JK.text, v = {};
+  JK.places.forEach(function (l) {
+    v['intro-' + l.id] = l.title + '. ' + l.how;
+    v['fact-' + l.id] = l.fact + ' ' + T.kerinciWord + ': ' + l.word.kerinci + ', ' + T.means + ' ' + l.word.meaning + '.';
+  });
+  Object.keys(T.animals).forEach(function (k) { v['animal-' + k] = T.animals[k]; });
+  Object.keys(T.goods).forEach(function (k) { v['goods-' + k] = T.goods[k]; });
+  [1, 2, 3].forEach(function (n) { v['praise-' + n] = T.praise[n]; });
+  v['map-ask'] = T.mapAsk;
+  v['map-open'] = T.mapOpen;
+  v['map-done'] = T.mapDone;
+  return v;
+})();

@@ -2,8 +2,8 @@
  * Service worker: keeps the game's files on the device, so it still plays
  * without a connection after one visit.
  *
- * VERSION and FILES are filled in by scripts/build.mjs for a release; do not
- * fill them in by hand.
+ * VERSION, FILES and AUDIO are filled in by scripts/build.mjs for a release;
+ * do not fill them in by hand.
  *
  * - Release (VERSION holds a version number): every file is stored on install
  *   and served from the cache. A new release changes this file, so the phone
@@ -13,6 +13,7 @@
  */
 var VERSION = 'dev';
 var FILES = [];
+var AUDIO = [];
 
 var CACHE = 'jelajah-kerinci-' + VERSION;
 var RELEASE = VERSION !== 'dev';
@@ -22,7 +23,17 @@ self.addEventListener('install', function (e) {
     caches.open(CACHE)
       .then(function (c) {
         // 'reload' skips the browser's HTTP cache, so what is stored is certainly this release.
-        return c.addAll(FILES.map(function (u) { return new Request(u, { cache: 'reload' }); }));
+        return c.addAll(FILES.map(function (u) { return new Request(u, { cache: 'reload' }); }))
+          .then(function () {
+            // The sounds are most of the download and the game plays without them:
+            // one at a time, and a failure passes. A sound that is missing here is
+            // stored the first time the game asks for it.
+            return AUDIO.reduce(function (before, u) {
+              return before.then(function () {
+                return c.add(new Request(u, { cache: 'no-cache' })).catch(function () { /* next visit */ });
+              });
+            }, Promise.resolve());
+          });
       })
       .then(function () { return self.skipWaiting(); })
   );

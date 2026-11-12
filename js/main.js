@@ -7,6 +7,7 @@
   var screenNo = 0;       // goes up on every screen change, to drop delays left behind
   var screenName = '';
   var newVersion = false;
+  var said = {};          // the map lines Belang has already said aloud since the page opened
   var MAIN = JK.places.filter(function (l) { return !l.final; });
 
   function $(s) { return app.querySelector(s); }
@@ -22,6 +23,8 @@
     screenNo++;
     app.innerHTML = '<section class="screen ' + className + '">' + html + '</section>';
     screenName = className.split(' ')[0];
+    // A calm loop everywhere, a livelier one in a game. The rhythm game makes its own music.
+    A.music(screenName !== 'game' ? 'map' : / game-rhythm$/.test(className) ? '' : 'play');
     loadNewVersion();
     return app.firstElementChild;
   }
@@ -80,9 +83,7 @@
       '<p class="word"><span>' + T.kerinciWord + '</span> <b>' + l.word.kerinci + '</b> ' + T.means + ' ' + l.word.meaning + '</p>';
   }
 
-  function readFact(l) {
-    A.speak(l.fact + ' ' + T.kerinciWord + ': ' + l.word.kerinci + ', ' + T.means + ' ' + l.word.meaning + '.');
-  }
+  function readFact(l) { A.speak('fact-' + l.id); }
 
   /* A yes/no dialog. */
   function ask(question, onYes, onNo) {
@@ -159,7 +160,8 @@
       status[l.id] = { stars: D.data.stamps[l.id] || 0, locked: locked(l) };
     });
     var n = stampCount(), total = JK.places.length;
-    var say = n === total ? T.mapDone : mainCount() === MAIN.length ? T.mapOpen : T.mapAsk;
+    var line = n === total ? 'map-done' : mainCount() === MAIN.length ? 'map-open' : 'map-ask';
+    var say = JK.voice[line];
 
     show('map',
       '<header class="bar">' + roundButton('home', 'home', T.toHome) +
@@ -170,6 +172,11 @@
     wireSound();
     $('#home').onclick = function () { A.fx.tap(); goHome(); };
     $('#book').onclick = function () { A.fx.tap(); goDeeper(book); };
+    // Belang says each line once, not every time the map comes back.
+    if (!said[line]) {
+      said[line] = true;
+      A.speak(line);
+    }
 
     function choose(id) {
       var l = find(id);
@@ -205,7 +212,7 @@
       '<div class="footer"><button class="btn btn-big" id="start" type="button">' + S.icon('play') + T.start + '</button></div>');
     tint($('.intro-body'), l.color);
     wireSound();
-    var read = function () { A.speak(l.title + '. ' + l.how); };
+    var read = function () { A.speak('intro-' + id); };
     $('#back').onclick = function () { A.fx.tap(); goMap(); };
     $('#listen').onclick = read;
     $('#start').onclick = function () { A.fx.tap(); play(id); };
@@ -298,9 +305,12 @@
     $('#to-map').onclick = function () { A.fx.tap(); goMap(); };
     $('#listen').onclick = function () { readFact(l); };
 
+    // One after another, so nothing talks over anything else: the stars, the praise, the jingle.
     for (var i = 0; i < outcome.stars; i++) (function (k) { later(function () { A.fx.star(k); }, 250 + k * 350); })(i);
+    var afterStars = 250 + outcome.stars * 350 + 150;
+    later(function () { A.speak('praise-' + outcome.stars); }, afterStars);
     if (!before || l.final) {
-      later(A.fx.cheer, 1400);
+      later(A.fx.cheer, afterStars + 800);
       confetti(el);
     }
   }
@@ -363,6 +373,7 @@
   A.setEnabled(D.data.sound);
   // Browsers allow sound only after a first touch.
   document.addEventListener('pointerdown', function () { A.unlock(); }, { passive: true });
+  document.addEventListener('keydown', function () { A.unlock(); });
   // No context menu when a child presses for a long time.
   document.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 

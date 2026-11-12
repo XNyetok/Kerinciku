@@ -2,7 +2,7 @@
 // build, the local server and the checks, so they cannot drift apart.
 
 /** Top-level files and folders that are published. Everything else stays in the repository. */
-export const SITE_FILES = ['index.html', 'manifest.webmanifest', 'sw.js', 'css', 'js', 'icons'];
+export const SITE_FILES = ['index.html', 'manifest.webmanifest', 'sw.js', 'css', 'js', 'icons', 'audio'];
 
 /**
  * The Content-Security-Policy of the live site (deploy/nginx/). No inline script
@@ -32,5 +32,10 @@ export const HEADERS = {
   'Cross-Origin-Opener-Policy': 'same-origin',
 };
 
-/** Download budget for the whole site, in bytes. The game is played on cheap phones with weak signal. */
+/**
+ * Download budgets, in bytes. The game is played on cheap phones with weak
+ * signal: the first is for everything a game needs before it can be played,
+ * the second for the sounds in audio/, which arrive afterwards.
+ */
 export const SIZE_BUDGET = 400 * 1024;
+export const AUDIO_BUDGET = 1200 * 1024;

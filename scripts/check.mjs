@@ -1,11 +1,12 @@
 // Static checks that need no browser: the files the page asks for exist, the
 // scripts parse, every place on the map has its game, the interface text
-// lives in one file, and nothing in the page would be blocked by the live
-// site's Content-Security-Policy.
+// lives in one file, every sound exists and the narration says what the
+// screen shows, and nothing in the page would be blocked by the live site's
+// Content-Security-Policy.
 //
 //   node scripts/check.mjs
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { CSP } from './site.mjs';
@@ -91,7 +92,31 @@ for (const f of scripts.filter((s) => s !== 'js/strings.js')) {
   }
 }
 
-// 6. nginx sends the same policy the local server and the tests use.
+// 6. Every sound the game can ask for is in audio/, nothing else is, and each
+//    narration clip was recorded from the text the game shows today.
+try {
+  page.document = { addEventListener() {} };
+  page.navigator = {};
+  page.addEventListener = () => {};
+  vm.runInContext(read('js/audio.js'), page, { filename: 'js/audio.js' });
+  const wanted = page.JK.audio.files().map((f) => `audio/${f}.mp3`);
+  for (const f of wanted) check(existsSync(join(root, f)), `${f} does not exist`);
+  const present = readdirSync(join(root, 'audio'), { recursive: true, withFileTypes: true })
+    .filter((e) => e.isFile() && !e.name.startsWith('.'))
+    .map((e) => join(e.parentPath, e.name).slice(root.length + 1).split(sep).join('/'));
+  for (const f of present) check(wanted.includes(f), `${f} is not used by the game`);
+
+  const recorded = JSON.parse(read('scripts/voice.json'));
+  const lines = page.JK.voice;
+  for (const key of Object.keys(lines)) {
+    check(recorded[key] === lines[key], `narration "${key}": the clip was recorded from other words than js/strings.js has now; record it again (docs/audio.md)`);
+  }
+  for (const key of Object.keys(recorded)) check(key in lines, `scripts/voice.json lists "${key}", which the game no longer says`);
+} catch (e) {
+  errors.push(`sounds: ${e.message}`);
+}
+
+// 7. nginx sends the same policy the local server and the tests use.
 const nginx = readdirSync(join(root, 'deploy/nginx')).filter((f) => f.endsWith('.conf'));
 check(nginx.length > 0, 'deploy/nginx has no config');
 for (const f of nginx) {
@@ -106,4 +131,4 @@ if (errors.length) {
   console.error(errors.map((e) => `check: ${e}`).join('\n'));
   process.exit(1);
 }
-console.log(`check: ${scripts.length} scripts, ${refs.length} references, the places and the CSP are consistent`);
+console.log(`check: ${scripts.length} scripts, ${refs.length} references, the places, the sounds and the CSP are consistent`);
