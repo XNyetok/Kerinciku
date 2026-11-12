@@ -115,6 +115,24 @@
     });
   }
 
+  /* What the game is and is not sure of, with a way to report a mistake. */
+  function about() {
+    var o = JK.el('div', 'overlay',
+      '<div class="dialog dialog-note" role="dialog" aria-modal="true" aria-labelledby="about-title">' +
+      '<h2 id="about-title">' + T.aboutTitle + '</h2>' +
+      T.aboutText.map(function (p) { return '<p>' + p + '</p>'; }).join('') +
+      '<p><a href="' + T.aboutReportUrl + '" target="_blank" rel="noopener">' + T.aboutReport + '</a></p>' +
+      '<div class="row"><button class="btn" type="button">' + T.close + '</button></div></div>');
+    app.firstElementChild.appendChild(o);
+    o.querySelector('button').focus();
+    o.addEventListener('click', function (e) {
+      // The button closes it, and so does a touch outside the note.
+      if (e.target !== o && !(e.target.closest && e.target.closest('button'))) return;
+      o.remove();
+      A.fx.tap();
+    });
+  }
+
   /* ---------- Moving between screens (the phone's back button works too) ---------- */
 
   // History depth: 0 the title, 1 the map, 2 anything deeper.
@@ -150,7 +168,7 @@
   function home() {
     show('home',
       S.scenes.home +
-      '<header class="bar"><span></span>' + soundButton() + '</header>' +
+      '<header class="bar">' + roundButton('about', 'info', T.about) + soundButton() + '</header>' +
       '<div class="home-body"><p class="greeting">' + T.greeting + '</p>' +
       '<h1>' + T.title[0] + '<br>' + T.title[1] + '</h1>' +
       '<p class="invite">' + T.invite + '</p></div>' +
@@ -159,6 +177,7 @@
       '<p class="version">' + (JK.version === 'dev' ? '' : 'v' + JK.version.split('+')[0]) + '</p>' +
       '<p class="credit">' + T.credit + ' <a href="https://' + T.creditSite + '" target="_blank" rel="noopener">' + T.creditSite + '</a></p></div>');
     wireSound();
+    $('#about').onclick = function () { A.fx.tap(); about(); };
     $('#play').onclick = function () {
       A.fx.tap();
       goMap();
