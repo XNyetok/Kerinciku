@@ -166,6 +166,8 @@ button { font: inherit; color: inherit; }
 }
 .home-footer .mascot { width: 104px; animation: bob 2.4s ease-in-out infinite; }
 .version { min-height: 14px; margin-top: 4px; font-size: 12px; font-weight: 700; color: #1d5b3c; opacity: .7; }
+.credit { font-size: 12px; font-weight: 700; color: #1d5b3c; }
+.credit a { color: inherit; text-decoration: underline; }
 
 /* ---------- Map ---------- */
 

@@ -4,6 +4,7 @@ test('the title leads to a map with six places, the mountain locked', async ({ p
   await page.goto('/');
   await expect(page.locator('h1')).toHaveText('JelajahKerinci');
   await expect(page.locator('.version')).toHaveText('v0.0.0-test');
+  await expect(page.locator('.credit a')).toHaveAttribute('href', 'https://nyetok.id');
   await tap(page, '#play');
   await expect(page.locator('.pin')).toHaveCount(6);
   await expect(page.locator('.pin[data-id="mountain"]')).toHaveClass(/pin-locked/);
