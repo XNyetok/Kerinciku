@@ -104,7 +104,7 @@ JK.text = {
     forest: function (n) { return 'Kamu memotret ' + n + ' satwa rimba!'; },
     rhythm: function () { return 'Kamu mengikuti irama Rentak Kudo!'; },
     market: function (n) { return 'Semua pasangan ketemu dalam ' + n + ' kali coba!'; },
-    mountain: function () { return 'Kamu sampai di puncak, 3.805 meter!'; }
+    mountain: function () { return 'Kamu sampai di puncak, 3.805 meter di atas permukaan laut!'; }
   }
 };
 
@@ -167,7 +167,7 @@ JK.places = [
     place: 'Gunung Kerinci',
     title: 'Mendaki Gunung',
     how: 'Sentuh layar berkali-kali untuk melangkah sampai ke puncak!',
-    fact: 'Gunung Kerinci tingginya 3.805 meter. Ini gunung berapi tertinggi di Indonesia!',
+    fact: 'Gunung Kerinci adalah gunung berapi tertinggi di Indonesia, dan masih aktif. Tingginya 3.805 meter di atas permukaan laut. Kerinci juga gunung tertinggi di Pulau Sumatra.',
     word: { kerinci: 'Kincai', meaning: 'Kerinci' }
   }
 ];
