@@ -66,7 +66,7 @@
       g.score(count + '/' + ANIMALS.length);
       g.stage.querySelector('.slot[data-animal="' + n + '"]').classList.add('got');
       photo.innerHTML = '<div class="photo-card">' + S.icon(n) + '<b>' + T.animals[n] + '</b></div>';
-      A.speak(T.animals[n]);
+      A.speak('animal-' + n);
       quietUntil = g.clock.t + 1300;
       g.clock.after(function () { photo.innerHTML = ''; }, 1500);
 

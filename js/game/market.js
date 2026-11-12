@@ -54,7 +54,7 @@
           name.textContent = T.goods[a.kind];
           JK.replay(name, 'pop');
           A.fx.right();
-          A.speak(T.goods[a.kind]);
+          A.speak('goods-' + a.kind);
           locked = false;
           if (pairs === GOODS.length) {
             g.clock.after(function () {

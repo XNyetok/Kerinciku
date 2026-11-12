@@ -185,3 +185,40 @@ test('five stamps open the mountain, and the summit completes the book', async (
   await expect(page.locator('#book')).toContainText('6/6');
   expect(await exists(page, '.pin-pulse'), 'no place is left to visit').toBe(false);
 });
+
+const sound = (page) => page.evaluate(() => window.JK.audio.status());
+const quitGame = async (page) => {
+  await tap(page, '#quit');
+  await tap(page, '.overlay [data-answer="yes"]');
+  await expect(page.locator('.map')).toBeVisible();
+};
+
+test('the recorded sounds load, and the music follows the screen and the sound button', async ({ page }) => {
+  await openMap(page);
+  await expect.poll(async () => (await sound(page)).music).toBe('map');
+  await expect.poll(async () => (await sound(page)).loaded).toEqual(expect.arrayContaining(['sfx/tap', 'sfx/gong', 'music/play']));
+
+  await openGame(page, 'market');
+  await expect.poll(async () => (await sound(page)).music).toBe('play');
+  await quitGame(page);
+  await expect.poll(async () => (await sound(page)).music).toBe('map');
+
+  // The rhythm game is about hearing the instruments: no music under it.
+  await openGame(page, 'rhythm');
+  await expect.poll(async () => (await sound(page)).music).toBe(null);
+  await quitGame(page);
+
+  await tap(page, '#sound');
+  await expect.poll(async () => (await sound(page)).music).toBe(null);
+  await tap(page, '#sound');
+  await expect.poll(async () => (await sound(page)).music).toBe('map');
+});
+
+test('a place is introduced by its recorded narration, which stops when the screen is left', async ({ page }) => {
+  await openMap(page);
+  await tapPin(page, 'lake');
+  await expect.poll(async () => (await sound(page)).speaking).toBe(true);
+  expect((await sound(page)).loaded).toContain('voice/intro-lake');
+  await tap(page, '#back');
+  await expect.poll(async () => (await sound(page)).speaking).toBe(false);
+});

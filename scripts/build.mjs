@@ -8,7 +8,7 @@
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { basename, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { SITE_FILES, SIZE_BUDGET } from './site.mjs';
+import { AUDIO_BUDGET, SITE_FILES, SIZE_BUDGET } from './site.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const out = resolve(process.argv[2] || join(root, 'dist'));
@@ -49,14 +49,21 @@ function stamp(file, from, to) {
 }
 
 const files = allFiles(out).map((f) => relative(out, f).split(sep).join('/')).sort();
-const cached = ['./', ...files.filter((f) => f !== 'sw.js')];
+const isAudio = (f) => f.startsWith('audio/');
+const cached = ['./', ...files.filter((f) => f !== 'sw.js' && !isAudio(f))];
+const audio = files.filter(isAudio);
 
 stamp('js/version.js', "JK.version = 'dev';", `JK.version = ${JSON.stringify(label)};`);
 if (label !== 'dev') {
   stamp('sw.js', "var VERSION = 'dev';", `var VERSION = ${JSON.stringify(label)};`);
   stamp('sw.js', 'var FILES = [];', `var FILES = ${JSON.stringify(cached)};`);
+  stamp('sw.js', 'var AUDIO = [];', `var AUDIO = ${JSON.stringify(audio)};`);
 }
 
-const size = allFiles(out).reduce((n, f) => n + statSync(f).size, 0);
-console.log(`build: ${label}, ${files.length} files, ${(size / 1024).toFixed(1)} KB -> ${relative(root, out) || out}`);
-if (size > SIZE_BUDGET) fail(`the site is ${size} bytes, over the ${SIZE_BUDGET} byte budget`);
+const bytes = (list) => list.reduce((n, f) => n + statSync(join(out, f)).size, 0);
+const size = bytes(files.filter((f) => !isAudio(f)));
+const audioSize = bytes(audio);
+const kb = (n) => (n / 1024).toFixed(1);
+console.log(`build: ${label}, ${files.length} files, ${kb(size)} KB + ${kb(audioSize)} KB of sound -> ${relative(root, out) || out}`);
+if (size > SIZE_BUDGET) fail(`the site without its sounds is ${size} bytes, over the ${SIZE_BUDGET} byte budget`);
+if (audioSize > AUDIO_BUDGET) fail(`the sounds are ${audioSize} bytes, over the ${AUDIO_BUDGET} byte budget`);

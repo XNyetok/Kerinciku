@@ -30,7 +30,7 @@ The repository is public and permissive, so a few rules are absolute.
   people or their accounts. Names of children who tried the game must not be recorded here.
 - **No unlicensed assets.** Every image, sound and font must be your own work, public
   domain, or properly licensed. All of the game's pictures are currently drawn in SVG in
-  `js/art.js`.
+  `js/art.js`; where the sounds come from is written down in `docs/audio.md`.
 - **No generated noise.** Do not commit `node_modules/`, `dist/`, test reports or editor
   caches.
 

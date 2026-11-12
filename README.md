@@ -14,8 +14,8 @@ Every stamp opens one short fact and one word in the Kerinci language.
 | ![The map of Kerinci with six places](docs/media/map.png) | ![Animals peeking out of the bushes in the forest](docs/media/forest.png) |
 
 The game is in Indonesian, with words in the Kerinci language. It is designed for Android
-phones held upright, and also runs on a laptop. The whole site is about 150 KB and, after
-one visit, plays without a connection.
+phones held upright, and also runs on a laptop. The game itself is about 150 KB, its
+sounds about 1 MB more, and after one visit it plays without a connection.
 
 ## What is in it
 
@@ -81,7 +81,7 @@ css/style.css           all styling
 js/strings.js           all interface text, the list of places, the Kerinci words
 js/util.js              helpers, saved progress, the game clock
 js/art.js               every picture (SVG), including the map
-js/audio.js             sounds (Web Audio) and reading text aloud
+js/audio.js             effects, music and narration (Web Audio)
 js/main.js              the screens: title, map, introduction, game, result, stamp book
 js/game/*.js            one file per mini-game
 js/boot.js              the reload prompt when a file fails to load
@@ -89,15 +89,19 @@ js/version.js           the version number, stamped by the build
 sw.js                   offline play
 manifest.webmanifest    what "Add to home screen" uses
 icons/                  app icons
+audio/                  recorded effects, music and narration (docs/audio.md)
 
 scripts/                build, local server, checks
 tests/                  unit tests and browser tests
 deploy/                 server script and nginx config
 docs/deploy.md          how a release reaches the server
+docs/audio.md           where the sounds come from and how to replace one
 ```
 
-The game ships no libraries, image files or sound files. Pictures are drawn in SVG and
-sounds are synthesised by the browser, which is what keeps the download small.
+The game ships no libraries and no image files: pictures are drawn in SVG, which keeps
+the part a game needs before it can be played small. The sounds in `audio/` are fetched
+after the page has loaded, and the game plays without them: until a sound has arrived, the
+browser synthesises a stand-in.
 
 ## Adding a mini-game
 
@@ -125,8 +129,8 @@ The live site allows no inline script or style (Content-Security-Policy): do not
 
 - Stamps and the sound setting are kept on the player's own device (`localStorage`). The
   stamp book has a "start over" button. The game sends nothing to a server.
-- Reading text aloud uses the device's own voices, and only speaks when the device has an
-  Indonesian voice.
+- Narration is recorded. When a clip cannot be loaded, the device's own voice reads the
+  text instead, and only when the device has an Indonesian voice.
 - When a file fails to load (a weak signal, for example), a message with a reload button
   appears instead of a frozen screen.
 - The Incung script is not in the game yet: its letters have to come from a proper source,
