@@ -56,19 +56,20 @@ The browser tests need Chromium once: `npx playwright install chromium`.
 
 ## Text and the Kerinci language
 
-Everything a player reads is in `js/strings.js`, in Indonesian, and nowhere else. Words in
-the Kerinci language that no native speaker has confirmed yet are marked `// CHECK`:
+Everything a player reads is in `js/strings.js`, in Indonesian, and nowhere else. The
+words in the Kerinci language have been confirmed by a native speaker:
 
 | Word | Meaning used | Where |
 | --- | --- | --- |
 | Apo kabar, uhang Kincai? | How are you, people of Kerinci? | Title screen |
 | aro | a fig tree, a kind of banyan | Kayu Aro |
 | imbo | forest | Rimba TNKS |
-| kulit manih | cinnamon | Sungai Penuh |
-| ayik | water | Danau Kerinci |
+| kulit manaih | cinnamon | Sungai Penuh |
+| aye | water | Danau Kerinci |
 
 Dialects differ from village to village. Corrections from native speakers are very
-welcome: open an issue, or send a pull request that changes `js/strings.js`.
+welcome: open an issue, or send a pull request that changes `js/strings.js`. A word that
+nobody has confirmed yet is marked `// CHECK` there.
 
 The fact shown at each place (`fact`) and the heights of the posts on the climb
 (`mountain.posts`) are in the same file. Every height but the summit's is approximate.
