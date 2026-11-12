@@ -121,7 +121,7 @@
       '<div class="dialog dialog-note" role="dialog" aria-modal="true" aria-labelledby="about-title">' +
       '<h2 id="about-title">' + T.aboutTitle + '</h2>' +
       T.aboutText.map(function (p) { return '<p>' + p + '</p>'; }).join('') +
-      '<p><a href="' + T.aboutReportUrl + '" target="_blank" rel="noopener">' + T.aboutReport + '</a></p>' +
+      '<p><a href="' + T.aboutReportUrl + '">' + T.aboutReport + '</a></p>' +
       '<div class="row"><button class="btn" type="button">' + T.close + '</button></div></div>');
     app.firstElementChild.appendChild(o);
     o.querySelector('button').focus();

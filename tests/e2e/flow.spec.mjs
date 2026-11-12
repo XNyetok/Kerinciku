@@ -9,7 +9,7 @@ test('the title leads to a map with six places, the mountain not open yet', asyn
   // The note about a game that is still growing opens and closes on the title.
   await tap(page, '#about');
   await expect(page.locator('.dialog')).toContainText('Masih terus dikembangkan');
-  await expect(page.locator('.dialog a')).toHaveAttribute('href', /\/issues$/);
+  await expect(page.locator('.dialog a')).toHaveAttribute('href', /^mailto:/);
   await tap(page, '.dialog button');
   await expect(page.locator('.overlay')).toHaveCount(0);
 

@@ -27,7 +27,7 @@ MAX_BYTES=$((2 * 1024 * 1024))
 
 # E-mail addresses that are meant to be public. Anything else is refused: a
 # contributor's address belongs in their Git identity, not in a file.
-ALLOWED_EMAIL='^(debi@elysiumx\.org|git@github\.com|noreply@github\.com|[A-Za-z0-9._+-]+(\[bot\])?@users\.noreply\.github\.com|[A-Za-z0-9._%+-]+@(example\.(com|org|net)|contoh\.(com|id)))$'
+ALLOWED_EMAIL='^(debi@elysiumx\.org|debi@nyetok\.id|git@github\.com|noreply@github\.com|[A-Za-z0-9._+-]+(\[bot\])?@users\.noreply\.github\.com|[A-Za-z0-9._%+-]+@(example\.(com|org|net)|contoh\.(com|id)))$'
 
 # Loopback, private and documentation ranges cannot point at a real server.
 ALLOWED_IP='^(127\.|0\.0\.0\.0$|10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.0\.2\.|198\.51\.100\.|203\.0\.113\.|255\.)'
