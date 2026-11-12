@@ -13,6 +13,8 @@ JK.text = {
   title: ['Jelajah', 'Kerinci'],
   greeting: 'Apo kabar, uhang Kincai?', // "How are you, people of Kerinci?"
   invite: 'Ayo keliling Bumi Sakti Alam Kerinci!',
+  credit: 'Dibuat oleh',
+  creditSite: 'nyetok.id',
 
   play: 'Main',
   start: 'Mulai',

@@ -144,7 +144,8 @@
       '<p class="invite">' + T.invite + '</p></div>' +
       '<div class="home-footer">' + S.icon('tiger', 'mascot') +
       '<button class="btn btn-big" id="play" type="button">' + S.icon('play') + T.play + '</button>' +
-      '<p class="version">' + (JK.version === 'dev' ? '' : 'v' + JK.version.split('+')[0]) + '</p></div>');
+      '<p class="version">' + (JK.version === 'dev' ? '' : 'v' + JK.version.split('+')[0]) + '</p>' +
+      '<p class="credit">' + T.credit + ' <a href="https://' + T.creditSite + '" target="_blank" rel="noopener">' + T.creditSite + '</a></p></div>');
     wireSound();
     $('#play').onclick = function () {
       A.fx.tap();
