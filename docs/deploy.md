@@ -285,8 +285,9 @@ Until `STAGING_ENABLED` is `true`, the workflow builds the new game and skips th
    `index.html` and `version.txt` arrived, switches `current`, records `previous` and
    prunes. This job runs nothing from npm.
 3. Smoke test: the page, `robots.txt` and every file the page loads answer 200; the live
-   `version.txt` is this build; the server sends the new game's policy and
-   `X-Robots-Tag: noindex`. If it fails, the job runs `deploy/remote.sh rollback-site`.
+   `version.txt` is this build; the WebAssembly files come gzip-compressed; the server
+   sends the new game's policy and `X-Robots-Tag: noindex`. If it fails, the job runs
+   `deploy/remote.sh rollback-site`.
 
 The staging site's policy is `GAME_CSP` in `scripts/site.mjs`. It differs from the live
 site's where the decoders of the 3D files need it: `blob:` for their workers and the

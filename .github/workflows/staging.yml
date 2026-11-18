@@ -202,6 +202,17 @@ jobs:
             [ "$code" = "200" ]
           done < <(grep -oE '/assets/[A-Za-z0-9._-]+' <<<"$page" | sort -u)
 
+          # The decoders' WebAssembly is fetched by script, not by the page: it must come
+          # compressed, or the first load grows by about 280 KB.
+          for file in dist/assets/*.wasm; do
+            [ -e "$file" ] || continue
+            path="/assets/${file##*/}"
+            encoding=$(curl -fsSI -H 'Accept-Encoding: gzip' "${SITE}${path}" | tr -d '\r' | awk -F': ' 'tolower($1) == "content-encoding" {print $2}')
+            echo "${encoding:-none} $path"
+            [ "$encoding" = "gzip" ] \
+              || { echo "::error::$path is not served compressed; install deploy/nginx/kerinciku-dev-rewrite.conf (docs/deploy.md)"; exit 1; }
+          done
+
           # The headers come from the server config, not from the build.
           headers=$(curl -fsSI "${SITE}/")
           grep -qi "^content-security-policy:.*'unsafe-eval'" <<<"$headers" \
