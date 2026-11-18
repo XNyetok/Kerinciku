@@ -254,9 +254,8 @@ VPS  /www/wwwroot/dev.kerinciku.web.id/releases/20261118000000-a1b2c3d/
 2. **Site in aaPanel** — Website → Add site. Domain `dev.kerinciku.web.id`, root
    `/www/wwwroot/dev.kerinciku.web.id`, no PHP, no database, no FTP.
 3. **Certificate in aaPanel** — Let's Encrypt, as for the live site, and remove `TLSv1.1`
-   from the new vhost. Do this before anyone opens the site: `kerinciku.web.id` sends HSTS
-   with `includeSubDomains`, so a browser that has visited the live site refuses
-   `dev.kerinciku.web.id` without a valid certificate.
+   from the new vhost. Do this before anyone opens the site, so nobody meets a certificate
+   warning.
 4. **Release folder** — owned by the same deploy user as the live site:
 
    ```sh
