@@ -33,6 +33,34 @@ export const HEADERS = {
 };
 
 /**
+ * The policy of the new game (game/), on the staging site
+ * (deploy/nginx/kerinciku-dev-rewrite.conf). It differs from CSP only where the decoders
+ * of the 3D files need it: 'wasm-unsafe-eval' to compile their WebAssembly, and blob: for
+ * the workers they start and the textures they unpack.
+ */
+export const GAME_CSP = [
+  "default-src 'self'",
+  "img-src 'self' data: blob:",
+  "style-src 'self'",
+  "script-src 'self' 'wasm-unsafe-eval'",
+  "worker-src 'self' blob:",
+  "connect-src 'self' blob:",
+  "manifest-src 'self'",
+  "base-uri 'self'",
+  "form-action 'none'",
+  "frame-ancestors 'none'",
+  "object-src 'none'",
+].join('; ');
+
+export const GAME_HEADERS = { ...HEADERS, 'Content-Security-Policy': GAME_CSP, 'X-Robots-Tag': 'noindex, nofollow' };
+
+/** Which policy each nginx file in deploy/nginx/ sends (npm run check compares them). */
+export const NGINX_POLICIES = {
+  'kerinciku-rewrite.conf': CSP,
+  'kerinciku-dev-rewrite.conf': GAME_CSP,
+};
+
+/**
  * Download budgets, in bytes. The game is played on cheap phones with weak
  * signal: the first is for everything a game needs before it can be played,
  * the second for the sounds in audio/, which arrive afterwards.

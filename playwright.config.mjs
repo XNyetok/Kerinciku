@@ -1,11 +1,18 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const PORT = 4173;
+const GAME_PORT = 4174;
+const GAME_TESTS = /[\\/]e2e[\\/]game[\\/]/;
 
 /**
- * Browser tests against a release build (dist/), served by scripts/serve.mjs
- * with the live site's security headers. They play every game to the end, so
- * a broken game, a blocked script or a lost stamp fails here.
+ * Browser tests against release builds, served with the live headers.
+ *
+ * The live game (dist/, served by scripts/serve.mjs with the live site's security
+ * headers): the tests play every game to the end, so a broken game, a blocked script or
+ * a lost stamp fails here.
+ *
+ * The new game (game/dist/, served by `vite preview` with the staging site's headers):
+ * tests in tests/e2e/game/.
  */
 export default defineConfig({
   testDir: 'tests/e2e',
@@ -19,14 +26,24 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   projects: [
-    { name: 'phone', use: { ...devices['Pixel 7'] } },
-    { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1000, height: 780 } } },
+    { name: 'phone', testIgnore: GAME_TESTS, use: { ...devices['Pixel 7'] } },
+    { name: 'desktop', testIgnore: GAME_TESTS, use: { ...devices['Desktop Chrome'], viewport: { width: 1000, height: 780 } } },
+    // The new game is played with the phone held sideways (landscape).
+    { name: 'game', testMatch: GAME_TESTS, use: { ...devices['Pixel 7 landscape'], baseURL: `http://127.0.0.1:${GAME_PORT}` } },
   ],
-  webServer: {
-    // A release-like label, so the service worker runs in release mode as it does live.
-    command: `BUILD_LABEL=0.0.0-test node scripts/build.mjs && node scripts/serve.mjs dist --port ${PORT}`,
-    url: `http://127.0.0.1:${PORT}`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 60_000,
-  },
+  webServer: [
+    {
+      // A release-like label, so the service worker runs in release mode as it does live.
+      command: `BUILD_LABEL=0.0.0-test node scripts/build.mjs && node scripts/serve.mjs dist --port ${PORT}`,
+      url: `http://127.0.0.1:${PORT}`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 60_000,
+    },
+    {
+      command: `BUILD_LABEL=0.0.0-test npm run game:build && npm run game:preview -- --port ${GAME_PORT} --strictPort`,
+      url: `http://127.0.0.1:${GAME_PORT}`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+  ],
 });

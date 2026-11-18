@@ -1,10 +1,15 @@
 # Deploy
 
 The game is a static site, plus a small collector for its anonymous counts
-(`docs/telemetry.md`). Merging to `main` only runs the checks; players get a change when a
-maintainer pushes a version tag and publishes the draft release it creates. Publishing
-copies that release to the VPS over SSH, into fresh release folders, and switches `current`
-to them. The VPS runs nginx through aaPanel; the panel owns the vhost and the certificate.
+(`docs/telemetry.md`). Merging to `main` runs the checks and never changes the live game;
+players get a change when a maintainer pushes a version tag and publishes the draft
+release it creates. Publishing copies that release to the VPS over SSH, into fresh release
+folders, and switches `current` to them. The VPS runs nginx through aaPanel; the panel
+owns the vhost and the certificate.
+
+The new game, which is being built in `game/`, is not part of a release yet. A merge that
+touches it goes to the staging site, `dev.kerinciku.web.id`, to be tried on real phones
+(see *Staging*).
 
 ```
 PR, merge to main ─► CI: secret scan, tracked files and personal data, static
@@ -45,8 +50,9 @@ collector notices that `current` points at another release and stops, and system
 the new one. The deploy waits for the health answer to name the new release before it
 moves the site, and puts the old collector back if that never happens.
 
-Three files on the server come from this repository but are installed by hand: the
-site's rewrite rules (`deploy/nginx/kerinciku-rewrite.conf`), the rate limit zones
+Four files on the server come from this repository but are installed by hand: the
+site's rewrite rules (`deploy/nginx/kerinciku-rewrite.conf`), the staging site's rewrite
+rules (`deploy/nginx/kerinciku-dev-rewrite.conf`), the rate limit zones
 (`deploy/nginx/kerinciku-limits.conf`) and the service
 (`deploy/systemd/kerinciku-stats.service`). A release never touches the server's nginx or
 systemd config (see *Changing the server config*).
@@ -103,9 +109,13 @@ systemd config (see *Changing the server config*).
 | `DEPLOY_PORT` | variable | SSH port |
 | `DEPLOY_PATH` | variable | site root, `/www/wwwroot/kerinciku.web.id` |
 | `DEPLOY_ENABLED` | variable | `true`, or `false` to pause deploys |
+| `STAGING_PATH` | variable, environment `staging` | staging site root, `/www/wwwroot/dev.kerinciku.web.id` |
+| `STAGING_ENABLED` | variable | `true` once the staging site exists, `false` to pause staging deploys |
 
 The deploy job runs in the GitHub environment `production`, which accepts only tags
-matching `v*.*.*`. A branch, a pull request or a fork cannot deploy.
+matching `v*.*.*`. A branch, a pull request or a fork cannot deploy to the live site. The
+staging deploy (*Staging*) runs in the environment `staging`, from `main` or from a branch
+a maintainer starts it on; a pull request from a fork never reaches it.
 
 A variable missing from GitHub is an empty string in the workflow, not an error. The first
 step of the deploy job ("Check deploy settings") fails the run when any of them is empty or
@@ -192,6 +202,11 @@ sudo cp -p "$F" "$F.bak-$(date +%F-%H%M%S)"
 sudo install -m 644 /tmp/kerinciku-rewrite.conf "$F"     # copied over with scp
 # The rate limit zones the rules refer to; only when that file changed.
 sudo install -m 644 /tmp/kerinciku-limits.conf /www/server/panel/vhost/nginx/0.kerinciku-limits.conf
+# The staging site's rules; only when that file changed. The panel creates the file,
+# empty, together with the site.
+D=/www/server/panel/vhost/rewrite/dev.kerinciku.web.id.conf
+sudo cp -p "$D" "$D.bak-$(date +%F-%H%M%S)"
+sudo install -m 644 /tmp/kerinciku-dev-rewrite.conf "$D"
 sudo nginx -t && sudo nginx -s reload
 ```
 
@@ -213,6 +228,74 @@ previous release, so running it a second time undoes it. No rebuild, no downtime
 Through CI instead, deploy the previous release again:
 `gh workflow run deploy.yml --ref v<previous>`. Then fix the problem on `main` and release
 a new version.
+
+## Staging
+
+The new game (`game/`) is tried at `https://dev.kerinciku.web.id` long before it is part
+of a release: on real phones, over HTTPS and a real connection, with the server's own
+headers. Anyone with the link can open it; search engines are told to stay away
+(`X-Robots-Tag: noindex`, and a `robots.txt` that disallows everything). It has no
+collector and counts nothing.
+
+```
+merge to main that touches game/ ─┐
+gh workflow run staging.yml       ├─► Staging: build without secrets
+  --ref <branch>                 ─┘        │
+                                           ▼  deploy job, environment "staging"
+VPS  /www/wwwroot/dev.kerinciku.web.id/releases/20261118000000-a1b2c3d/
+                                           │
+                                           ▼  deploy/remote.sh activate-site, smoke test
+     current ─► the new build, previous ─► the one before (five newest kept)
+```
+
+### One-time setup
+
+1. **DNS** — `A dev.kerinciku.web.id → <server IP>`.
+2. **Site in aaPanel** — Website → Add site. Domain `dev.kerinciku.web.id`, root
+   `/www/wwwroot/dev.kerinciku.web.id`, no PHP, no database, no FTP.
+3. **Certificate in aaPanel** — Let's Encrypt, as for the live site, and remove `TLSv1.1`
+   from the new vhost. Do this before anyone opens the site: `kerinciku.web.id` sends HSTS
+   with `includeSubDomains`, so a browser that has visited the live site refuses
+   `dev.kerinciku.web.id` without a valid certificate.
+4. **Release folder** — owned by the same deploy user as the live site:
+
+   ```sh
+   sudo mkdir -p /www/wwwroot/dev.kerinciku.web.id/releases
+   sudo chown <deploy-user>: /www/wwwroot/dev.kerinciku.web.id /www/wwwroot/dev.kerinciku.web.id/releases
+   ```
+
+5. **Rewrite rules** — install `deploy/nginx/kerinciku-dev-rewrite.conf` (see *Changing
+   the server config*). Without them nginx looks for files in the site root, not in
+   `current`.
+6. **GitHub** — the environment `staging`, the variable `STAGING_PATH` (see *Repository
+   secrets and variables*), and the repository variable `STAGING_ENABLED` set to `true`.
+   The deploy reuses the live site's deploy key, host, user and port; no new key is needed.
+
+Until `STAGING_ENABLED` is `true`, the workflow builds the new game and skips the deploy.
+
+### What a staging deploy does
+
+`.github/workflows/staging.yml`:
+
+1. Build: `npm ci`, then `npm run game:build` (type check, then Vite) with the label
+   `0.0.0-dev+<sha7>`, which the page shows and `version.txt` holds. This job has no secret.
+2. Deploy, in the environment `staging`: check the settings (`STAGING_PATH` must be the
+   root of `dev.kerinciku.web.id` and never `DEPLOY_PATH`), `rsync` the build into a fresh
+   release folder, and run `deploy/remote.sh activate-site`, which checks that
+   `index.html` and `version.txt` arrived, switches `current`, records `previous` and
+   prunes. This job runs nothing from npm.
+3. Smoke test: the page, `robots.txt` and every file the page loads answer 200; the live
+   `version.txt` is this build; the server sends the new game's policy and
+   `X-Robots-Tag: noindex`. If it fails, the job runs `deploy/remote.sh rollback-site`.
+
+The staging site's policy is `GAME_CSP` in `scripts/site.mjs`. It differs from the live
+site's where the decoders of the 3D files need it: `'wasm-unsafe-eval'` to compile their
+WebAssembly, and `blob:` for their workers and the textures they unpack. `npm run
+game:preview` and the browser tests send the same policy.
+
+To go back, as the deploy user on the server:
+`bash deploy/remote.sh rollback-site /www/wwwroot/dev.kerinciku.web.id`. Or deploy an
+older state again: `gh workflow run staging.yml --ref <branch or tag>`.
 
 ## Notes
 
