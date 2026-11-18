@@ -1,25 +1,134 @@
 html, body {
   margin: 0;
-  min-height: 100%;
+  height: 100%;
+  overflow: hidden;
   background: #c5c6c4;
   color: #1d2320;
-  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.note {
+.stage, .stage canvas {
+  position: fixed;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+[hidden] { display: none !important; }
+
+.hud {
+  position: fixed;
+  left: max(8px, env(safe-area-inset-left));
+  top: max(8px, env(safe-area-inset-top));
+  margin: 0;
+  padding: 6px 8px;
+  font: 10px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: pre;
+  color: #1d2320;
+  background: rgba(255, 255, 255, 0.72);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.buttons {
+  position: fixed;
+  right: max(8px, env(safe-area-inset-right));
+  top: max(8px, env(safe-area-inset-top));
+  display: flex;
+  gap: 6px;
+}
+
+button {
+  font: inherit;
+  font-size: 13px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 6px;
+  color: #fff;
+  background: rgba(29, 35, 32, 0.78);
+}
+
+button:active { background: rgba(29, 35, 32, 0.95); }
+
+.notice, .message {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 8px 12px;
+  max-width: min(90vw, 36rem);
+  text-align: center;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.86);
+  pointer-events: none;
+}
+
+.notice {
+  bottom: max(12px, env(safe-area-inset-bottom));
+  font-size: 13px;
+  max-width: min(70vw, 30rem);
+}
+.message { top: 42%; }
+.message:empty { display: none; }
+
+.results {
+  position: fixed;
+  inset: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 12px max(12px, env(safe-area-inset-left));
+  overflow: auto;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.results pre {
+  margin: 0 0 8px;
+  font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: pre-wrap;
+}
+
+.results textarea {
   box-sizing: border-box;
-  max-width: 34rem;
-  margin: 0 auto;
-  padding: max(1.5rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
-    1.5rem max(1rem, env(safe-area-inset-left));
+  width: 100%;
+  font: 10px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-h1 {
-  margin: 0 0 0.75rem;
-  font-size: 1.5rem;
-}
+.results-buttons { display: flex; gap: 8px; }
 
 .label {
+  position: fixed;
+  right: max(8px, env(safe-area-inset-right));
+  bottom: max(4px, env(safe-area-inset-bottom));
+  margin: 0;
+  font-size: 10px;
   color: #4a524e;
-  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+.stick {
+  position: fixed;
+  left: -48px;
+  top: -48px;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.28);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+}
+
+.stick-knob {
+  position: absolute;
+  left: 26px;
+  top: 26px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
 }

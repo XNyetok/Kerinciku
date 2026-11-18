@@ -204,7 +204,7 @@ jobs:
 
           # The headers come from the server config, not from the build.
           headers=$(curl -fsSI "${SITE}/")
-          grep -qi "^content-security-policy:.*'wasm-unsafe-eval'" <<<"$headers" \
+          grep -qi "^content-security-policy:.*'unsafe-eval'" <<<"$headers" \
             || { echo "::error::staging does not send the new game's Content-Security-Policy; install deploy/nginx/kerinciku-dev-rewrite.conf (docs/deploy.md)"; exit 1; }
           grep -qi '^x-robots-tag:.*noindex' <<<"$headers" \
             || { echo "::error::staging does not send X-Robots-Tag: noindex"; exit 1; }

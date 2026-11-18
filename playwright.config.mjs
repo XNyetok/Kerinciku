@@ -28,8 +28,17 @@ export default defineConfig({
   projects: [
     { name: 'phone', testIgnore: GAME_TESTS, use: { ...devices['Pixel 7'] } },
     { name: 'desktop', testIgnore: GAME_TESTS, use: { ...devices['Desktop Chrome'], viewport: { width: 1000, height: 780 } } },
-    // The new game is played with the phone held sideways (landscape).
-    { name: 'game', testMatch: GAME_TESTS, use: { ...devices['Pixel 7 landscape'], baseURL: `http://127.0.0.1:${GAME_PORT}` } },
+    // The new game is played with the phone held sideways (landscape). It needs WebGL2:
+    // where there is no GPU (CI), Chromium draws with SwiftShader.
+    {
+      name: 'game',
+      testMatch: GAME_TESTS,
+      use: {
+        ...devices['Pixel 7 landscape'],
+        baseURL: `http://127.0.0.1:${GAME_PORT}`,
+        launchOptions: { args: ['--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] },
+      },
+    },
   ],
   webServer: [
     {

@@ -289,9 +289,10 @@ Until `STAGING_ENABLED` is `true`, the workflow builds the new game and skips th
    `X-Robots-Tag: noindex`. If it fails, the job runs `deploy/remote.sh rollback-site`.
 
 The staging site's policy is `GAME_CSP` in `scripts/site.mjs`. It differs from the live
-site's where the decoders of the 3D files need it: `'wasm-unsafe-eval'` to compile their
-WebAssembly, and `blob:` for their workers and the textures they unpack. `npm run
-game:preview` and the browser tests send the same policy.
+site's where the decoders of the 3D files need it: `blob:` for their workers and the
+textures they unpack, and `'unsafe-eval'`, because the Basis texture transcoder that
+ships with three.js creates functions with `new Function` (Emscripten's embind). Inline
+scripts stay blocked. `npm run game:preview` and the browser tests send the same policy.
 
 To go back, as the deploy user on the server:
 `bash deploy/remote.sh rollback-site /www/wwwroot/dev.kerinciku.web.id`. Or deploy an
