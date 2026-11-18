@@ -26,6 +26,20 @@ export interface BenchResult {
 
 const sleep = (ms: number) => new Promise<void>((done) => setTimeout(done, ms));
 
+/**
+ * The suite: the standard scene at every pixel ratio worth comparing, then one change at
+ * a time at the default ratio. Each variant is a fresh page load with these settings.
+ */
+export const SUITE: { id: SuiteId; query: Record<string, string> }[] = [
+  { id: 'standard', query: {} },
+  { id: 'tex-1k', query: { tex: '1k' } },
+  { id: 'no-aa', query: { aa: '0' } },
+  { id: 'unique-16', query: { unique: '1', stalls: '16' } },
+  { id: 'npcs-24', query: { npcs: '24' } },
+];
+export type SuiteId = 'standard' | 'tex-1k' | 'no-aa' | 'unique-16' | 'npcs-24';
+export const SUITE_KEY = 'bench-suite';
+
 /** The pixel ratios worth comparing on this screen: 1, 1.5, 2 and the screen's own. */
 export function benchRatios(screenRatio: number): number[] {
   const top = Math.min(3, Math.max(1, screenRatio));

@@ -11,6 +11,8 @@
 //   ?dist=14         camera distance in metres (default 12)
 //   ?hud=0           no numbers on screen
 //   ?bench=1         start the benchmark at once; ?soak=300 adds a heat test of that many seconds
+//   ?suite=1         run every variant of the benchmark in a row (bench.ts, SUITE) and show
+//                    one combined result; `step` is set by the suite as it goes
 //   ?seed=7          the residents' random seed (the benchmark always uses the same one)
 
 export interface Params {
@@ -25,6 +27,8 @@ export interface Params {
   hud: boolean;
   bench: boolean;
   soak: number;
+  suite: boolean;
+  step: number;
   seed: number;
 }
 
@@ -54,6 +58,8 @@ export function readParams(search = location.search): Params {
     hud: q.get('hud') !== '0',
     bench: q.get('bench') === '1',
     soak: int(q, 'soak', 0, 0, 1800),
+    suite: q.get('suite') === '1',
+    step: int(q, 'step', 0, 0, 20),
     seed: int(q, 'seed', 7, 0, 2 ** 31 - 1),
   };
 }
