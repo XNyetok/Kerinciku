@@ -9,12 +9,25 @@
 <script type="module" src="/src/main.ts"></script>
 </head>
 <body>
-<main class="note">
-  <h1 id="title">Jelajah Kerinci</h1>
-  <p id="about"></p>
-  <p id="webgl"></p>
-  <p class="label" id="label"></p>
-  <noscript><p>Halaman ini butuh JavaScript.</p></noscript>
-</main>
+<div id="stage" class="stage"></div>
+<pre id="hud" class="hud" hidden></pre>
+<div id="buttons" class="buttons" hidden>
+  <button type="button" id="b-bench"></button>
+  <button type="button" id="b-full"></button>
+  <button type="button" id="b-hud"></button>
+</div>
+<p id="notice" class="notice" hidden></p>
+<p id="message" class="message"></p>
+<section id="results" class="results" hidden>
+  <pre id="results-text"></pre>
+  <textarea id="results-json" readonly rows="6"></textarea>
+  <p id="results-note"></p>
+  <div class="results-buttons">
+    <button type="button" id="b-copy"></button>
+    <button type="button" id="b-close"></button>
+  </div>
+</section>
+<p id="label" class="label"></p>
+<noscript><p>Halaman ini butuh JavaScript.</p></noscript>
 </body>
 </html>

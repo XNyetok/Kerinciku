@@ -35,14 +35,18 @@ export const HEADERS = {
 /**
  * The policy of the new game (game/), on the staging site
  * (deploy/nginx/kerinciku-dev-rewrite.conf). It differs from CSP only where the decoders
- * of the 3D files need it: 'wasm-unsafe-eval' to compile their WebAssembly, and blob: for
- * the workers they start and the textures they unpack.
+ * of the 3D files need it: blob: for the workers they start and the textures they unpack,
+ * and 'unsafe-eval'. The Basis texture transcoder that ships with three.js is built with
+ * Emscripten's embind, which creates functions with `new Function`; 'unsafe-eval' allows
+ * that, and covers compiling WebAssembly too. Inline scripts stay blocked. A transcoder
+ * built without dynamic execution, or a worker served with a policy of its own, would let
+ * this go again.
  */
 export const GAME_CSP = [
   "default-src 'self'",
   "img-src 'self' data: blob:",
   "style-src 'self'",
-  "script-src 'self' 'wasm-unsafe-eval'",
+  "script-src 'self' 'unsafe-eval'",
   "worker-src 'self' blob:",
   "connect-src 'self' blob:",
   "manifest-src 'self'",
