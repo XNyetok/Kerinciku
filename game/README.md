@@ -26,9 +26,15 @@ The numbers in the corner: frames per second (and the slowest 1%), draw calls an
 triangles, the canvas size, the JS heap (Chrome only), an estimate of GPU memory, what was
 downloaded, and the GPU. The GPU estimate counts textures, geometry and the drawing
 buffer as if multisampling stored four samples per pixel; phones that resolve
-multisampling on chip use less. "Uji kinerja" reloads the page and walks a fixed route at
-render pixel ratios 1, 1.5, 2 (and the screen's own when higher), 12 seconds each, then
-shows the results with a button that copies them as JSON.
+multisampling on chip use less.
+
+"Uji kinerja" runs the benchmark suite (`?suite=1`, about two to three minutes): the
+player walks a fixed route past the same residents while frame times are recorded. The
+standard scene runs at render pixel ratios 1, 1.5, 2 (and the screen's own when higher),
+12 seconds each; then, one change at a time at the default ratio, the 1024 px stall
+texture, no multisampling, 16 stalls with a texture each, and 24 residents. Each variant
+is a fresh page load; the finished runs wait in `sessionStorage`. At the end one result
+shows, with a button that copies it as JSON. `?bench=1` runs only the current settings.
 
 Settings come from the address, so a test on a phone is a link:
 
@@ -43,7 +49,8 @@ Settings come from the address, so a test on a phone is a link:
 | `aa=0` | no multisampling |
 | `dist=14` | camera distance in metres (default 12) |
 | `hud=0` | no numbers |
-| `bench=1` | start the benchmark at once; `soak=300` adds a heat test of that many seconds |
+| `suite=1` | run the whole benchmark suite |
+| `bench=1` | benchmark the current settings only; `soak=300` adds a heat test of that many seconds |
 
 ## Lighting
 

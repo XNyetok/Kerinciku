@@ -40,6 +40,15 @@ export const text = {
     `Uji kinerja ${step}/${steps}: rasio layar ${ratio.toFixed(2)}, ${left} dtk lagi. Jangan sentuh layar.`,
   soakRunning: (left: number) => `Uji panas: ${left} dtk lagi. Jangan sentuh layar.`,
   benchDone: 'Uji kinerja selesai.',
+  suiteDone: 'Rangkaian uji kinerja selesai.',
+  suiteStep: (step: number, steps: number, name: string) => `Rangkaian ${step}/${steps}, ${name}.`,
+  suiteNames: {
+    standard: 'standar (lapak 2K, antialiasing)',
+    'tex-1k': 'tekstur lapak 1K',
+    'no-aa': 'tanpa antialiasing',
+    'unique-16': '16 lapak, tekstur sendiri-sendiri',
+    'npcs-24': '24 penduduk',
+  },
   benchRow: (ratio: number, w: number, h: number, fps: number, p95: number, slow: number) =>
     `rasio ${ratio.toFixed(2)} (${w}×${h}): ${fps} fps, p95 ${p95.toFixed(1)} ms, ${slow}% bingkai lewat 33 ms`,
 };

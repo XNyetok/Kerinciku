@@ -11,7 +11,7 @@ import {
   SRGBColorSpace,
   WebGLRenderer,
 } from 'three';
-import { benchRatios, runBench, type BenchResult } from './bench';
+import { benchRatios, runBench, SUITE, SUITE_KEY, type BenchResult, type SuiteId } from './bench';
 import { FollowCamera } from './camera';
 import { Input } from './input';
 import { makeLoaders } from './loaders';
@@ -212,12 +212,9 @@ async function main(): Promise<void> {
   }
 
   // The benchmark always starts from a fresh load with the fixed seed, so every phone
-  // walks the same route past the same residents.
+  // walks the same route past the same residents. The button runs the whole suite.
   ui.bench.addEventListener('click', () => {
-    const q = new URLSearchParams(location.search);
-    q.set('bench', '1');
-    q.delete('seed');
-    location.search = q.toString();
+    location.search = suiteQuery(0);
   });
 
   const portrait = () => innerHeight > innerWidth && matchMedia('(pointer: coarse)').matches;
@@ -269,12 +266,15 @@ async function main(): Promise<void> {
   // For the browser tests: the player, and a flag once the first frames are drawn.
   Object.assign(window, { __player: player, __ready: true });
 
-  if (params.bench) {
+  if (params.bench || params.suite) {
+    const variant = params.suite ? SUITE[params.step] : undefined;
+    if (params.suite && !variant) throw new Error(`no suite step ${params.step}`);
     noticeUntil = 0;
     input.enabled = false;
     ui.buttons.hidden = true;
     benchRoute = 0;
     walkTo(player, market.route[0].x, market.route[0].z);
+    const prefix = variant ? `${text.suiteStep(params.step + 1, SUITE.length, text.suiteNames[variant.id])} ` : '';
     const result: BenchResult = await runBench(
       {
         frames,
@@ -284,13 +284,15 @@ async function main(): Promise<void> {
         },
         canvasSize: () => [renderer.domElement.width, renderer.domElement.height],
         status: (t) => {
-          ui.notice.textContent = t;
+          ui.notice.textContent = prefix + t;
           ui.notice.hidden = false;
         },
         stepLabel: text.benchRunning,
         soakLabel: text.soakRunning,
       },
-      benchRatios(window.devicePixelRatio || 1),
+      // The suite compares pixel ratios on the standard scene only; the other variants
+      // change one thing at the default ratio.
+      variant && variant.id !== 'standard' ? [params.ratio] : benchRatios(window.devicePixelRatio || 1),
       3,
       12,
       params.soak,
@@ -303,40 +305,94 @@ async function main(): Promise<void> {
     input.enabled = true;
     ui.buttons.hidden = false;
     ui.notice.hidden = true;
-    showResults(result);
+    const run = runReport(result, variant?.id ?? null);
+    if (!variant) {
+      showResults(text.benchDone, [run]);
+    } else {
+      // Runs stored by the earlier steps of this suite, on this phone.
+      const runs = [...(loadSuite(params.step) as (typeof run)[]), run];
+      if (params.step + 1 < SUITE.length && saveSuite(runs)) {
+        location.search = suiteQuery(params.step + 1);
+      } else {
+        clearSuite();
+        showResults(text.suiteDone, runs);
+      }
+    }
   }
 
-  function showResults(result: BenchResult): void {
-    const est = gpuEstimate(scene, renderer, params.aa);
-    const report = {
-      kind: 'tech-prototype-benchmark',
-      build: __BUILD_LABEL__,
-      date: new Date().toISOString(),
+  /** What one benchmark run measured, with the scene and the settings it ran with. */
+  function runReport(result: BenchResult, variant: string | null) {
+    return {
+      variant,
       params,
-      device: device(renderer),
       load: { readySeconds: Math.round(readyAt) / 1000, downloads: downloads() },
       memory: {
         jsHeap: jsHeap(),
-        gpuEstimate: est,
+        gpuEstimate: gpuEstimate(scene, renderer, params.aa),
         textures: market.textures.length + people.palettes.length,
       },
       scene: { stalls: market.stallCount, people: people.everyone.length, drawCalls: renderer.info.render.calls, triangles: renderer.info.render.triangles },
       bench: result,
     };
-    const json = JSON.stringify(report);
-    ui.resultsText.textContent = [
-      text.benchDone,
-      ...result.steps.map((s) => text.benchRow(s.ratio, s.canvas[0], s.canvas[1], s.fps, s.p95, s.slow33)),
-      ...(result.soak.length ? [`soak: ${result.soak.join(', ')} fps`] : []),
-      text.hud.gpu(report.device.gpu),
-    ].join('\n');
-    ui.resultsJson.value = json;
+  }
+
+  function showResults(title: string, runs: ReturnType<typeof runReport>[]): void {
+    const report = {
+      kind: runs.length > 1 ? 'tech-prototype-suite' : 'tech-prototype-benchmark',
+      build: __BUILD_LABEL__,
+      date: new Date().toISOString(),
+      device: device(renderer),
+      runs,
+    };
+    const lines = [title];
+    for (const run of runs) {
+      if (run.variant) lines.push(`${text.suiteNames[run.variant as SuiteId]}:`);
+      for (const st of run.bench.steps) lines.push(`  ${text.benchRow(st.ratio, st.canvas[0], st.canvas[1], st.fps, st.p95, st.slow33)}`);
+      if (run.bench.soak.length) lines.push(`  soak: ${run.bench.soak.join(', ')} fps`);
+    }
+    lines.push(text.hud.gpu(report.device.gpu));
+    ui.resultsText.textContent = lines.join('\n');
+    ui.resultsJson.value = JSON.stringify(report);
     ui.resultsNote.textContent = '';
     ui.results.hidden = false;
     console.info('benchmark result', report);
     (window as unknown as { __bench?: unknown }).__bench = report;
   }
+}
 
+/** The address of a suite step: the variant's settings, nothing else carried over. */
+function suiteQuery(step: number): string {
+  const q = new URLSearchParams({ suite: '1', step: String(step), ...SUITE[step].query });
+  return `?${q.toString()}`;
+}
+
+// The suite keeps its finished runs in sessionStorage between page loads. Without it
+// (a private window that refuses storage), each run shows its own result instead.
+function loadSuite(step: number): unknown[] {
+  if (step === 0) return [];
+  try {
+    const runs = JSON.parse(sessionStorage.getItem(SUITE_KEY) ?? '[]');
+    return Array.isArray(runs) ? runs : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveSuite(runs: unknown[]): boolean {
+  try {
+    sessionStorage.setItem(SUITE_KEY, JSON.stringify(runs));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function clearSuite(): void {
+  try {
+    sessionStorage.removeItem(SUITE_KEY);
+  } catch {
+    // Nothing stored.
+  }
 }
 
 main().catch((err: unknown) => {
