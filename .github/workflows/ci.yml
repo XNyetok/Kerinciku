@@ -74,7 +74,7 @@ jobs:
         run: |
           set -euo pipefail
           # The files are includes, so wrap them the way the panel does: the rules
-          # inside the site's server block, the rate limit zones at http level.
+          # inside each site's server block, the rate limit zones at http level.
           mkdir -p "$RUNNER_TEMP/nginx"
           cat > "$RUNNER_TEMP/nginx/nginx.conf" <<'EOF'
           events {}
@@ -83,6 +83,11 @@ jobs:
               listen 8080;
               server_name kerinciku.web.id www.kerinciku.web.id;
               include /repo/deploy/nginx/kerinciku-rewrite.conf;
+            }
+            server {
+              listen 8081;
+              server_name dev.kerinciku.web.id;
+              include /repo/deploy/nginx/kerinciku-dev-rewrite.conf;
             }
             include /repo/deploy/nginx/kerinciku-limits.conf;
           }
@@ -140,6 +145,13 @@ jobs:
         env:
           BUILD_LABEL: ${{ steps.label.outputs.label }}
         run: npm run build
+
+      # The new game (game/) goes to the staging site only (staging.yml); here it
+      # is type checked and built so a broken change cannot be merged.
+      - name: Type check and build the new game
+        env:
+          BUILD_LABEL: ${{ steps.label.outputs.label }}
+        run: npm run game:build
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

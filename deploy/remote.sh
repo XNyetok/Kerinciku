@@ -5,7 +5,12 @@
 #   ssh ... bash -s -- activate <site-root> <collector-root> <release> < deploy/remote.sh
 #   ssh ... bash -s -- rollback <site-root> <collector-root>           < deploy/remote.sh
 #
-# Both roots hold releases/<name>/ plus two symlinks: current (what is live)
+# The staging site of the new game has no collector; the staging workflow uses:
+#
+#   ssh ... bash -s -- activate-site <site-root> <release> < deploy/remote.sh
+#   ssh ... bash -s -- rollback-site <site-root>           < deploy/remote.sh
+#
+# Every root holds releases/<name>/ plus two symlinks: current (what is live)
 # and previous (what rollback goes back to). An operator can run the same file
 # by hand: bash deploy/remote.sh rollback <site-root> <collector-root>
 #
@@ -109,12 +114,27 @@ activate() {
   echo "Live: $release (previous site: ${old_site:-none}, previous collector: ${old_collector:-none})"
 }
 
-# Swap current and previous: running it twice undoes it. The site always goes
-# back; the collector goes back with it when it has a previous release.
-rollback() {
-  local site=$1 collector=$2 cur prev failed=0
+# A site without a collector: the staging site of the new game (docs/deploy.md,
+# Staging). Its build is complete with the page and the label the deploy checks.
+activate_site() {
+  local site=$1 release=$2 old_site file
+  [[ "$release" =~ ^[0-9]{14}-[0-9a-f]{7}$ ]] || die "bad release name: $release"
   check_root "$site"
-  check_root "$collector"
+  for file in index.html version.txt; do
+    [ -f "$site/releases/$release/$file" ] || die "release $release was not uploaded completely: $file is missing"
+  done
+
+  old_site=$(target "$site" current)
+  relink "$site" current "releases/$release"
+  if [ -n "$old_site" ] && [ "$old_site" != "releases/$release" ]; then relink "$site" previous "$old_site"; fi
+  prune "$site"
+
+  echo "Live: $release (previous site: ${old_site:-none})"
+}
+
+# Swap a site's current and previous.
+swap_site() {
+  local site=$1 cur prev
   prev=$(target "$site" previous)
   [ -n "$prev" ] || die "no previous release recorded in $site"
   [ -f "$site/$prev/index.html" ] || die "the previous release $prev is gone"
@@ -123,6 +143,15 @@ rollback() {
   relink "$site" current "$prev"
   if [ -n "$cur" ]; then relink "$site" previous "$cur"; fi
   echo "Rolled back $site: ${cur:-none} -> $prev"
+}
+
+# Swap current and previous: running it twice undoes it. The site always goes
+# back; the collector goes back with it when it has a previous release.
+rollback() {
+  local site=$1 collector=$2 cur prev failed=0
+  check_root "$site"
+  check_root "$collector"
+  swap_site "$site"
 
   prev=$(target "$collector" previous)
   if [ -n "$prev" ] && [ -f "$collector/$prev/index.mjs" ]; then
@@ -142,5 +171,7 @@ shift || true
 case "$command" in
   activate) [ $# -eq 3 ] || die "usage: activate <site-root> <collector-root> <release>"; activate "$@" ;;
   rollback) [ $# -eq 2 ] || die "usage: rollback <site-root> <collector-root>"; rollback "$@" ;;
-  *) die "usage: activate|rollback ..." ;;
+  activate-site) [ $# -eq 2 ] || die "usage: activate-site <site-root> <release>"; activate_site "$@" ;;
+  rollback-site) [ $# -eq 1 ] || die "usage: rollback-site <site-root>"; check_root "$1"; swap_site "$1" ;;
+  *) die "usage: activate|rollback|activate-site|rollback-site ..." ;;
 esac

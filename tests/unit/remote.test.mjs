@@ -62,6 +62,14 @@ printf '{"ok":true,"release":"%s"}' "$release"
       utimesSync(r, clock, clock);
       utimesSync(c, clock, clock);
     },
+    /** Upload a staging build, which has no collector; `without` leaves one file out. */
+    uploadSite(name, without) {
+      const r = join(site, 'releases', name);
+      mkdirSync(r, { recursive: true });
+      for (const f of ['index.html', 'version.txt']) if (f !== without) writeFileSync(join(r, f), name);
+      clock += 10;
+      utimesSync(r, clock, clock);
+    },
     /** From now on the collector of this release does not come up. */
     breakCollector: (name) => writeFileSync(broken, `${name}\n`),
     run(...args) {
@@ -193,6 +201,108 @@ test('bad input is refused before anything moves', { skip }, (t) => {
     ['rollback', s.site],
     ['destroy', s.site],
     [],
+  ]) {
+    assert.notEqual(s.run(...args).status, 0, args.join(' '));
+  }
+  assert.equal(s.link('current'), null);
+  assert.deepEqual(s.releases(), [A]);
+});
+
+// The staging site of the new game: a site root and no collector.
+
+test('activate-site switches a site that has no collector', { skip }, (t) => {
+  const s = server();
+  t.after(s.cleanup);
+  s.uploadSite(A);
+  s.uploadSite(B);
+
+  const first = s.run('activate-site', s.site, A);
+  assert.equal(first.status, 0, first.stderr);
+  assert.equal(s.link('current'), `releases/${A}`);
+  assert.equal(s.link('previous'), null);
+
+  const second = s.run('activate-site', s.site, B);
+  assert.equal(second.status, 0, second.stderr);
+  assert.equal(s.link('current'), `releases/${B}`);
+  assert.equal(s.link('previous'), `releases/${A}`);
+  assert.equal(s.link('current', s.collector), null, 'no collector is touched');
+});
+
+test('an incomplete staging build is refused and the live one stays', { skip }, (t) => {
+  const s = server();
+  t.after(s.cleanup);
+  s.uploadSite(A);
+  s.run('activate-site', s.site, A);
+
+  for (const missing of ['index.html', 'version.txt']) {
+    s.uploadSite(B, missing);
+    const r = s.run('activate-site', s.site, B);
+    assert.notEqual(r.status, 0, missing);
+    assert.match(r.stderr, /not uploaded completely/);
+    assert.equal(s.link('current'), `releases/${A}`);
+    rmSync(join(s.site, 'releases', B), { recursive: true });
+  }
+});
+
+test('rollback-site swaps current and previous, and a second one undoes it', { skip }, (t) => {
+  const s = server();
+  t.after(s.cleanup);
+  s.uploadSite(A);
+  s.uploadSite(B);
+  s.run('activate-site', s.site, A);
+  s.run('activate-site', s.site, B);
+
+  assert.equal(s.run('rollback-site', s.site).status, 0);
+  assert.equal(s.link('current'), `releases/${A}`);
+  assert.equal(s.link('previous'), `releases/${B}`);
+
+  assert.equal(s.run('rollback-site', s.site).status, 0);
+  assert.equal(s.link('current'), `releases/${B}`);
+  assert.equal(s.link('previous'), `releases/${A}`);
+});
+
+test('rollback-site without a previous release refuses and changes nothing', { skip }, (t) => {
+  const s = server();
+  t.after(s.cleanup);
+  s.uploadSite(A);
+  s.run('activate-site', s.site, A);
+
+  const r = s.run('rollback-site', s.site);
+  assert.notEqual(r.status, 0);
+  assert.match(r.stderr, /no previous release/);
+  assert.equal(s.link('current'), `releases/${A}`);
+});
+
+test('activate-site keeps five builds plus whatever current and previous point at', { skip }, (t) => {
+  const s = server();
+  t.after(s.cleanup);
+  const names = Array.from({ length: 8 }, (_, i) => `2026111200000${i}-${String(i).repeat(7)}`);
+  s.uploadSite(names[0]);
+  s.run('activate-site', s.site, names[0]);
+  for (const n of names.slice(1)) s.uploadSite(n);
+  const r = s.run('activate-site', s.site, names[7]);
+  assert.equal(r.status, 0, r.stderr);
+
+  assert.deepEqual(s.releases(), [names[0], ...names.slice(3)]);
+  assert.equal(s.link('previous'), `releases/${names[0]}`);
+});
+
+test('bad input to the staging commands is refused before anything moves', { skip }, (t) => {
+  const s = server();
+  t.after(s.cleanup);
+  s.uploadSite(A);
+
+  for (const args of [
+    ['activate-site', s.site, '../../etc'],
+    ['activate-site', s.site, 'latest'],
+    ['activate-site', 'relative/path', A],
+    ['activate-site', '/', A],
+    ['activate-site', `${s.site}/../site`, A],
+    ['activate-site', s.site],
+    ['activate-site', s.site, s.collector, A],
+    ['rollback-site'],
+    ['rollback-site', 'relative/path'],
+    ['rollback-site', s.site, s.collector],
   ]) {
     assert.notEqual(s.run(...args).status, 0, args.join(' '));
   }

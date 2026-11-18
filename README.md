@@ -50,6 +50,7 @@ npm run check        # files, places on the map and the security policy agree
 npm test             # the game clock, saved progress, the build, the collector, the deploy script, the privacy check
 npm run test:e2e     # plays all six games in a browser (phone and desktop)
 npm run build        # copies the site into dist/ and checks its size
+npm run game:build   # type checks and builds the new game (game/) into game/dist/
 ```
 
 The browser tests need Chromium once: `npx playwright install chromium`.
@@ -94,10 +95,11 @@ icons/                  app icons
 audio/                  recorded effects, music and narration (docs/audio.md)
 
 server/                 the collector of those counts and its panel (Node, SQLite)
+game/                   the new game, in progress: TypeScript, Vite, tried on the staging site
 scripts/                build, local server, checks
 tests/                  unit tests and browser tests
 deploy/                 server script, nginx config, the collector's service
-docs/deploy.md          how a release reaches the server
+docs/deploy.md          how a release reaches the server, and the staging site
 docs/telemetry.md       what is counted, what never is, and the panel
 docs/audio.md           where the sounds come from and how to replace one
 ```

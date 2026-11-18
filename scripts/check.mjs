@@ -10,7 +10,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
-import { CSP } from './site.mjs';
+import { NGINX_POLICIES } from './site.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const read = (f) => readFileSync(join(root, f), 'utf8');
@@ -117,18 +117,29 @@ try {
   errors.push(`sounds: ${e.message}`);
 }
 
-// 7. nginx sends the same policy the local server and the tests use.
+// 7. nginx sends the same policy the local server and the tests use: the live site's
+//    rules send CSP, the staging site's rules send GAME_CSP (scripts/site.mjs).
 const nginx = readdirSync(join(root, 'deploy/nginx')).filter((f) => f.endsWith('.conf'));
 check(nginx.length > 0, 'deploy/nginx has no config');
-let policyCount = 0;
 for (const f of nginx) {
   const policies = [...read(`deploy/nginx/${f}`).matchAll(/add_header Content-Security-Policy "([^"]+)"/g)].map((m) => m[1]);
-  policyCount += policies.length;
+  const expected = NGINX_POLICIES[f];
+  if (expected === undefined) {
+    check(policies.length === 0, `deploy/nginx/${f} sends a Content-Security-Policy that scripts/site.mjs does not know (NGINX_POLICIES)`);
+    continue;
+  }
+  check(policies.length > 0, `deploy/nginx/${f} sends no Content-Security-Policy`);
   for (const p of policies) {
-    check(p.replace(/; upgrade-insecure-requests$/, '') === CSP, `deploy/nginx/${f}: the CSP differs from scripts/site.mjs`);
+    check(p.replace(/; upgrade-insecure-requests$/, '') === expected, `deploy/nginx/${f}: the CSP differs from scripts/site.mjs`);
   }
 }
-check(policyCount > 0, 'deploy/nginx sends no Content-Security-Policy');
+for (const f of Object.keys(NGINX_POLICIES)) check(nginx.includes(f), `scripts/site.mjs names deploy/nginx/${f}, which does not exist`);
+
+// 7b. The new game's page (game/index.html) keeps to its policy too: Vite bundles its
+//     script and style into files, so nothing inline may be written into the page.
+const gameHtml = read('game/index.html');
+check(!/<script(?![^>]*\bsrc=)[^>]*>/i.test(gameHtml), 'game/index.html has an inline <script>');
+check(!/<style[\s>]|\sstyle\s*=|\son[a-z]+\s*=/i.test(gameHtml), 'game/index.html has an inline style or event handler');
 
 // 8. The collector and its panel parse, and the panel keeps to the collector's
 //    policy: no inline script, style or handler.
